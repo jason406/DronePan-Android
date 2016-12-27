@@ -9,10 +9,12 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import dji.sdk.base.DJIBaseProduct;
+import dji.sdk.products.DJIAircraft;
 
 public class ConnectionActivity extends AppCompatActivity {
 
@@ -27,8 +29,7 @@ public class ConnectionActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
 
             Toast.makeText(getApplicationContext(), "Connection status changed", Toast.LENGTH_LONG).show();
-
-
+            updateUI();
 
         }
     };
@@ -62,5 +63,23 @@ public class ConnectionActivity extends AppCompatActivity {
     protected void onDestroy() {
         unregisterReceiver(mReceiver);
         super.onDestroy();
+    }
+
+    private void updateUI() {
+        DJIBaseProduct mProduct = DJIConnection.getProductInstance();
+
+        if (null != mProduct && mProduct.isConnected()) {
+
+            if (null != mProduct.getModel()) {
+                mTextProduct.setText(mProduct.getModel().getDisplayName() + " connected");
+            } else {
+                mTextProduct.setText("Model unavailable");
+            }
+
+        } else {
+
+            mTextConnectionStatus.setText("No product connected");
+
+        }
     }
 }
