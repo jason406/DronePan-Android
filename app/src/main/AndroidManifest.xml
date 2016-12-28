@@ -58,16 +58,21 @@
                 android:resource="@xml/accessory_filter" />
         </activity>
 
-        <service android:name="dji.sdk.sdkmanager.DJIGlobalService"></service>
+        <service android:name="dji.sdk.sdkmanager.DJIGlobalService" />
         <!-- DJI SDK -->
-        <activity android:name=".ConnectionActivity" android:screenOrientation="landscape">
+        <activity
+            android:name=".ConnectionActivity"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CameraActivity" android:screenOrientation="landscape"></activity>
+        <activity
+            android:name=".CameraActivity"
+            android:screenOrientation="landscape" />
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

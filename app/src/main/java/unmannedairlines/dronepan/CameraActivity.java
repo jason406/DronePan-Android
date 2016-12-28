@@ -1,10 +1,15 @@
 package unmannedairlines.dronepan;
 
+import android.content.Intent;
+import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
+import android.media.audiofx.BassBoost;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import dji.common.camera.DJICameraSettingsDef;
@@ -15,7 +20,7 @@ import dji.sdk.base.DJIBaseProduct;
 import dji.sdk.camera.DJICamera;
 import dji.sdk.codec.DJICodecManager;
 
-public class CameraActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
+public class CameraActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener, View.OnClickListener {
 
     private static final String TAG = CameraActivity.class.getName();
     protected DJICamera.CameraReceivedVideoDataCallback mReceivedVideoDataCallBack = null;
@@ -23,6 +28,8 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
     // Codec for video live view
     protected DJICodecManager mCodecManager = null;
     protected TextureView mVideoSurface = null;
+
+    private Button mSettingsBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +55,9 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
         if (null != mVideoSurface) {
             mVideoSurface.setSurfaceTextureListener(this);
         }
+
+        mSettingsBtn = (Button) findViewById(R.id.btn_settings);
+        mSettingsBtn.setOnClickListener(this);
 
     }
 
@@ -108,6 +118,20 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
                 Toast.makeText(CameraActivity.this, msg, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        switch (v.getId()) {
+            case R.id.btn_settings:{
+                Intent intent = new Intent(CameraActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     @Override
