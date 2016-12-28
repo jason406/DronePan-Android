@@ -6,22 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import dji.sdk.base.DJIBaseProduct;
-import dji.sdk.products.DJIAircraft;
 
 public class ConnectionActivity extends AppCompatActivity {
 
     private static final String TAG = ConnectionActivity.class.getName();
 
     private TextView mTextConnectionStatus;
-    private TextView mTextProduct;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
@@ -29,7 +27,10 @@ public class ConnectionActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
 
             Toast.makeText(getApplicationContext(), "Connection status changed", Toast.LENGTH_LONG).show();
+
             updateUI();
+
+            launchCameraActivity();
 
         }
     };
@@ -57,6 +58,8 @@ public class ConnectionActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJIConnection.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
+
+        launchCameraActivity();
     }
 
     @Override
@@ -71,9 +74,9 @@ public class ConnectionActivity extends AppCompatActivity {
         if (null != mProduct && mProduct.isConnected()) {
 
             if (null != mProduct.getModel()) {
-                mTextProduct.setText(mProduct.getModel().getDisplayName() + " connected");
+                mTextConnectionStatus.setText(mProduct.getModel().getDisplayName() + " connected");
             } else {
-                mTextProduct.setText("Model unavailable");
+                mTextConnectionStatus.setText("Model unavailable");
             }
 
         } else {
@@ -81,5 +84,25 @@ public class ConnectionActivity extends AppCompatActivity {
             mTextConnectionStatus.setText("No product connected");
 
         }
+    }
+
+    private void launchCameraActivity() {
+
+        final Handler h = new Handler();
+
+        final Runnable begin = new Runnable() {
+
+            @Override
+            public void run() {
+
+                Intent intent = new Intent(ConnectionActivity.this, CameraActivity.class);
+                startActivity(intent);
+
+            }
+        };
+
+        // Let's delay for three seconds and then we'll display the camera view
+        h.postDelayed(begin, 3000);
+
     }
 }

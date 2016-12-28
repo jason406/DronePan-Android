@@ -16,7 +16,7 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
-        sha1="fdc3cb8db4d3ddd27280144042d29df5b16be155">
+        sha1="142eb861208491ed07baef985a1ebcced152aa2b">
         <dex dex="/Users/db/_dev/DronePan-Android/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_032620f1e36decd8e4ca9aa0121af0e5eafbdb66/classes.dex" />
     </item>
     <item
@@ -34,7 +34,7 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
-        sha1="93fffa886f8a53933e1d96e30ebb35ccb9590fdc">
+        sha1="c107ed23718f5d3bf5d5c1d512f79a0bc5ec6d4a">
         <dex dex="/Users/db/_dev/DronePan-Android/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_0875ff9fe3bfb4b9dd7d616a66ef38588e4ade4e/classes.dex" />
     </item>
     <item
