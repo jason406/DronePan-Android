@@ -61,6 +61,18 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        initPreviewer();
+    }
+
+    @Override
+    protected void onDestroy() {
+        uninitPreviewer();
+        super.onDestroy();
+    }
+
     private void initPreviewer() {
 
         DJIBaseProduct product = DJIConnection.getProductInstance();
