@@ -43,7 +43,7 @@
         <uses-library android:name="com.android.future.usb.accessory" />
 
         <meta-data
-            android:name="unmannedairlines.dronepan"
+            android:name="com.dji.sdk.API_KEY"
             android:value="20b0677495aae58555283ae5" />
 
         <activity
