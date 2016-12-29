@@ -26,11 +26,7 @@ public class ConnectionActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Toast.makeText(getApplicationContext(), "Connection status changed", Toast.LENGTH_LONG).show();
-
             updateUI();
-
-            launchCameraActivity();
 
         }
     };
@@ -59,7 +55,8 @@ public class ConnectionActivity extends AppCompatActivity {
         filter.addAction(DJIConnection.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
 
-        launchCameraActivity();
+        mTextConnectionStatus = (TextView) findViewById(R.id.text_connection_status);
+
     }
 
     @Override
@@ -78,6 +75,9 @@ public class ConnectionActivity extends AppCompatActivity {
             } else {
                 mTextConnectionStatus.setText("Model unavailable");
             }
+
+            // Let's take them to the camera view
+            launchCameraActivity();
 
         } else {
 
@@ -101,8 +101,8 @@ public class ConnectionActivity extends AppCompatActivity {
             }
         };
 
-        // Let's delay for three seconds and then we'll display the camera view
-        h.postDelayed(begin, 3000);
+        // Let's delay for 1 second and then we'll display the camera view
+        h.postDelayed(begin, 1000);
 
     }
 }
