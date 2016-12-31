@@ -12,15 +12,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import dji.common.battery.DJIBatteryState;
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
 import dji.common.product.Model;
 import dji.common.util.DJICommonCallbacks;
 import dji.sdk.base.DJIBaseProduct;
+import dji.sdk.battery.DJIBattery;
 import dji.sdk.camera.DJICamera;
 import dji.sdk.codec.DJICodecManager;
 
-public class CameraActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener, View.OnClickListener {
+public class CameraActivity extends BaseActivity implements TextureView.SurfaceTextureListener, View.OnClickListener {
 
     private static final String TAG = CameraActivity.class.getName();
     protected DJICamera.CameraReceivedVideoDataCallback mReceivedVideoDataCallBack = null;
@@ -32,7 +34,7 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
     private Button mSettingsBtn;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_camera);
@@ -58,6 +60,31 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
 
         mSettingsBtn = (Button) findViewById(R.id.btn_settings);
         mSettingsBtn.setOnClickListener(this);
+
+        try {
+            DJIConnection.getProductInstance().getBattery().setBatteryStateUpdateCallback(
+                    new DJIBattery.DJIBatteryStateUpdateCallback() {
+                        @Override
+                        public void onResult(DJIBatteryState djiBatteryState) {
+
+                            Log.d(TAG, "Batter remaining: " + djiBatteryState.getBatteryEnergyRemainingPercent());
+                            /*mStringBuffer.delete(0, mStringBuffer.length());
+
+                            mStringBuffer.append("BatteryEnergyRemainingPercent: ").
+                                    append(djiBatteryState.getBatteryEnergyRemainingPercent()).
+                                    append("%\n");
+                            mStringBuffer.append("CurrentVoltage: ").
+                                    append(djiBatteryState.getCurrentVoltage()).append("mV\n");
+                            mStringBuffer.append("CurrentCurrent: ").
+                                    append(djiBatteryState.getCurrentCurrent()).append("mA\n");
+
+                            mHandler.sendEmptyMessage(CHANGE_TEXT_VIEW);*/
+                        }
+                    }
+            );
+        } catch (Exception e) {
+
+        }
 
     }
 

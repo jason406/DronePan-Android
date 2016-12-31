@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import dji.sdk.base.DJIBaseProduct;
 
-public class ConnectionActivity extends AppCompatActivity {
+public class ConnectionActivity extends BaseActivity {
 
     private static final String TAG = ConnectionActivity.class.getName();
 
@@ -32,7 +32,7 @@ public class ConnectionActivity extends AppCompatActivity {
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -56,6 +56,9 @@ public class ConnectionActivity extends AppCompatActivity {
         registerReceiver(mReceiver, filter);
 
         mTextConnectionStatus = (TextView) findViewById(R.id.text_connection_status);
+
+        // For testing in emulator
+        //launchCameraActivity();
 
     }
 
