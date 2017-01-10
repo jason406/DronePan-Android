@@ -18,15 +18,6 @@
         android:layout_marginTop="122dp"
         android:id="@+id/video_previewer_surface" />
 
-    <TextView
-        android:text="Camera"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="43dp"
-        android:id="@+id/textView2" />
-
     <Button
         android:text="settings"
         android:layout_width="wrap_content"
@@ -34,4 +25,12 @@
         android:id="@+id/btn_settings"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="Camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/btn_settings"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

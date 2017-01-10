@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import dji.common.battery.DJIBatteryState;
@@ -32,6 +33,8 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     protected TextureView mVideoSurface = null;
 
     private Button mSettingsBtn;
+
+    private TextView textView2;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,13 +64,18 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         mSettingsBtn = (Button) findViewById(R.id.btn_settings);
         mSettingsBtn.setOnClickListener(this);
 
+        textView2 = (TextView)findViewById(R.id.textView2);
+        textView2.setText("Hello!!!!");
+
         try {
             DJIConnection.getProductInstance().getBattery().setBatteryStateUpdateCallback(
                     new DJIBattery.DJIBatteryStateUpdateCallback() {
                         @Override
                         public void onResult(DJIBatteryState djiBatteryState) {
 
-                            Log.d(TAG, "Batter remaining: " + djiBatteryState.getBatteryEnergyRemainingPercent());
+                            Log.d(TAG, "Battery remaining: " + djiBatteryState.getBatteryEnergyRemainingPercent());
+
+                            textView2.setText("Batt: " + djiBatteryState.getBatteryEnergyRemainingPercent());
                             /*mStringBuffer.delete(0, mStringBuffer.length());
 
                             mStringBuffer.append("BatteryEnergyRemainingPercent: ").
