@@ -34,7 +34,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private Button mSettingsBtn;
 
-    private TextView textView2;
+    private TextView batteryLabel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,8 +64,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         mSettingsBtn = (Button) findViewById(R.id.btn_settings);
         mSettingsBtn.setOnClickListener(this);
 
-        textView2 = (TextView)findViewById(R.id.textView2);
-        textView2.setText("Hello!!!!");
+        batteryLabel = (TextView)findViewById(R.id.batteryLabel);
 
         try {
             DJIConnection.getProductInstance().getBattery().setBatteryStateUpdateCallback(
@@ -73,9 +72,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         @Override
                         public void onResult(DJIBatteryState djiBatteryState) {
 
-                            Log.d(TAG, "Battery remaining: " + djiBatteryState.getBatteryEnergyRemainingPercent());
-
-                            textView2.setText("Batt: " + djiBatteryState.getBatteryEnergyRemainingPercent());
+                            batteryLabel.setText("Battery: " + djiBatteryState.getBatteryEnergyRemainingPercent() + "%");
                             /*mStringBuffer.delete(0, mStringBuffer.length());
 
                             mStringBuffer.append("BatteryEnergyRemainingPercent: ").
