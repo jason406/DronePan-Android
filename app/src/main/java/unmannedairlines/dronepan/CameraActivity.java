@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
 import android.media.audiofx.BassBoost;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +18,10 @@ import android.widget.Toast;
 import dji.common.battery.DJIBatteryState;
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
+import dji.common.flightcontroller.DJIVirtualStickYawControlMode;
+import dji.common.gimbal.DJIGimbalAngleRotation;
+import dji.common.gimbal.DJIGimbalRotateAngleMode;
+import dji.common.gimbal.DJIGimbalRotateDirection;
 import dji.common.product.Model;
 import dji.common.util.DJICommonCallbacks;
 import dji.sdk.base.DJIBaseProduct;
@@ -157,33 +162,101 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private void startPano() {
 
-        int[] pitches = new int[]{0, -30, -60};
-        int[] yaws = new int[]{0, 60, 120, 180, 240, 300};
-
         flightController = DJIConnection.getAircraftInstance().getFlightController();
 
         // Let's enable virtual stick control mode so we can send commands to the flight controller
-//        flightController.enableVirtualStickControlMode(
-//                new DJICommonCallbacks.DJICompletionCallback() {
-//                    @Override
-//                    public void onResult(DJIError djiError) {
-//                        if (djiError == null) {
-//
-//                            showToast("Successfully enabled virtual stick mode");
-//
-//
-//                        } else {
-//
-//                            showToast("Error enabling virtual stick mode");
-//
-//                        }
-//                    }
-//                }
-//        );
+        flightController.enableVirtualStickControlMode(
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        if (error == null) {
+
+                            // For I1 and I2 users
+                            shootPanoWithGimbal();
+
+                            // Let's set the yaw mode to angle
+                            // DJIConnection.getAircraftInstance().getFlightController().setYawControlMode(DJIVirtualStickYawControlMode.Angle);
+
+
+
+
+                        } else {
+
+                            showToast("Error enabling virtual stick mode");
+
+                        }
+                    }
+                }
+        );
 
         Log.e(TAG, "Starting pano");
 
     }
+
+    private void shootPanoWithGimbal() {
+
+        // Setup our gimbal pitch/yaw angles
+        int[] pitches = new int[]{0, -30, -60};
+        int[] yaws = new int[]{0, 60, 120, 180, 240, 300};
+
+        // We need to reset the gimbal first
+        resetGimbal();
+
+        final Handler h = new Handler();
+
+        final Runnable pitch = new Runnable() {
+
+
+            @Override
+            public void run() {
+
+                setGimbalAttitude(0, 30);
+
+            }
+
+        };
+
+
+
+
+    }
+
+    private void setGimbalAttitude(float pitch, float yaw) {
+
+        DJIGimbalAngleRotation gimbalPitch = new DJIGimbalAngleRotation(true, pitch, DJIGimbalRotateDirection.Clockwise);
+        DJIGimbalAngleRotation gimbalRoll = new DJIGimbalAngleRotation(false, 0, DJIGimbalRotateDirection.Clockwise);
+        DJIGimbalAngleRotation gimbalYaw = new DJIGimbalAngleRotation(true, yaw, DJIGimbalRotateDirection.Clockwise);
+
+        DJIConnection.getProductInstance().getGimbal().rotateGimbalByAngle(DJIGimbalRotateAngleMode.AbsoluteAngle, gimbalPitch, gimbalRoll, gimbalYaw,
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        if (error == null) {
+
+                        }
+                    }
+                });
+
+    }
+
+    private void resetGimbal() {
+
+        DJIGimbalAngleRotation gimbalPitch = new DJIGimbalAngleRotation(true, 0, DJIGimbalRotateDirection.Clockwise);
+        DJIGimbalAngleRotation gimbalRoll = new DJIGimbalAngleRotation(true, 0, DJIGimbalRotateDirection.Clockwise);
+        DJIGimbalAngleRotation gimbalYaw = new DJIGimbalAngleRotation(true, 0, DJIGimbalRotateDirection.Clockwise);
+
+        DJIConnection.getProductInstance().getGimbal().rotateGimbalByAngle(DJIGimbalRotateAngleMode.AbsoluteAngle, gimbalPitch, gimbalRoll, gimbalYaw,
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        if (error == null) {
+
+                        }
+                    }
+                });
+    }
+
+    private
 
     public void showToast(final String msg) {
         runOnUiThread(new Runnable() {
