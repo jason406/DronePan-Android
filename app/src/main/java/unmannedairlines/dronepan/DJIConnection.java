@@ -66,6 +66,11 @@ public class DJIConnection extends Application {
         return camera;
     }
 
+    public static synchronized DJIAircraft getAircraftInstance() {
+        if (!isAircraftConnected()) return null;
+        return (DJIAircraft) getProductInstance();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

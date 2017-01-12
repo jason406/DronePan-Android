@@ -80,7 +80,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="31dp"
-        android:id="@+id/imageButton3"
+        android:id="@+id/panoButton"
         android:background="@android:color/transparent"/>
 
 </RelativeLayout>

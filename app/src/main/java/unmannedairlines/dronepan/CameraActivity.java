@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,7 @@ import dji.sdk.base.DJIBaseProduct;
 import dji.sdk.battery.DJIBattery;
 import dji.sdk.camera.DJICamera;
 import dji.sdk.codec.DJICodecManager;
+import dji.sdk.flightcontroller.DJIFlightController;
 
 public class CameraActivity extends BaseActivity implements TextureView.SurfaceTextureListener, View.OnClickListener {
 
@@ -34,7 +36,11 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private Button mSettingsBtn;
 
+    private ImageButton panoButton;
+
     private TextView batteryLabel;
+
+    private DJIFlightController flightController;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +67,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             mVideoSurface.setSurfaceTextureListener(this);
         }
 
+        panoButton = (ImageButton) findViewById(R.id.panoButton);
+        panoButton.setOnClickListener(this);
+
         mSettingsBtn = (Button) findViewById(R.id.btn_settings);
         mSettingsBtn.setOnClickListener(this);
 
@@ -73,17 +82,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         public void onResult(DJIBatteryState djiBatteryState) {
 
                             batteryLabel.setText("Battery: " + djiBatteryState.getBatteryEnergyRemainingPercent() + "%");
-                            /*mStringBuffer.delete(0, mStringBuffer.length());
 
-                            mStringBuffer.append("BatteryEnergyRemainingPercent: ").
-                                    append(djiBatteryState.getBatteryEnergyRemainingPercent()).
-                                    append("%\n");
-                            mStringBuffer.append("CurrentVoltage: ").
-                                    append(djiBatteryState.getCurrentVoltage()).append("mV\n");
-                            mStringBuffer.append("CurrentCurrent: ").
-                                    append(djiBatteryState.getCurrentCurrent()).append("mA\n");
-
-                            mHandler.sendEmptyMessage(CHANGE_TEXT_VIEW);*/
                         }
                     }
             );
@@ -156,6 +155,36 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         }
     }
 
+    private void startPano() {
+
+        int[] pitches = new int[]{0, -30, -60};
+        int[] yaws = new int[]{0, 60, 120, 180, 240, 300};
+
+        flightController = DJIConnection.getAircraftInstance().getFlightController();
+
+        // Let's enable virtual stick control mode so we can send commands to the flight controller
+//        flightController.enableVirtualStickControlMode(
+//                new DJICommonCallbacks.DJICompletionCallback() {
+//                    @Override
+//                    public void onResult(DJIError djiError) {
+//                        if (djiError == null) {
+//
+//                            showToast("Successfully enabled virtual stick mode");
+//
+//
+//                        } else {
+//
+//                            showToast("Error enabling virtual stick mode");
+//
+//                        }
+//                    }
+//                }
+//        );
+
+        Log.e(TAG, "Starting pano");
+
+    }
+
     public void showToast(final String msg) {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -171,6 +200,10 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             case R.id.btn_settings:{
                 Intent intent = new Intent(CameraActivity.this, SettingsActivity.class);
                 startActivity(intent);
+                break;
+            }
+            case R.id.panoButton: {
+                startPano();
                 break;
             }
             default:
