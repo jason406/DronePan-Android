@@ -86,7 +86,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         @Override
                         public void onResult(DJIBatteryState djiBatteryState) {
 
-                            batteryLabel.setText("Battery: " + djiBatteryState.getBatteryEnergyRemainingPercent() + "%");
+                            //batteryLabel.setText("Battery: " + djiBatteryState.getBatteryEnergyRemainingPercent() + "%");
 
                         }
                     }
@@ -164,21 +164,15 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         flightController = DJIConnection.getAircraftInstance().getFlightController();
 
-        // Let's enable virtual stick control mode so we can send commands to the flight controller
+        /*// Let's enable virtual stick control mode so we can send commands to the flight controller
         flightController.enableVirtualStickControlMode(
                 new DJICommonCallbacks.DJICompletionCallback() {
                     @Override
                     public void onResult(DJIError error) {
                         if (error == null) {
 
-                            // For I1 and I2 users
-                            shootPanoWithGimbal();
-
                             // Let's set the yaw mode to angle
                             // DJIConnection.getAircraftInstance().getFlightController().setYawControlMode(DJIVirtualStickYawControlMode.Angle);
-
-
-
 
                         } else {
 
@@ -187,34 +181,63 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         }
                     }
                 }
-        );
+        );*/
+
+        // We need to reset the gimbal first
+        resetGimbal();
+
+        // For I1 and I2 users
+        shootPanoWithGimbal();
 
         Log.e(TAG, "Starting pano");
 
     }
 
+    private int loopCount = 0;
+    // Setup our gimbal pitch/yaw angles
+    final float[] pitches = new float[]{0, -30, -60};
+    final float[] yaws = new float[]{0, 60, 120, 180, 240, 300};
+
     private void shootPanoWithGimbal() {
-
-        // Setup our gimbal pitch/yaw angles
-        int[] pitches = new int[]{0, -30, -60};
-        int[] yaws = new int[]{0, 60, 120, 180, 240, 300};
-
-        // We need to reset the gimbal first
-        resetGimbal();
 
         final Handler h = new Handler();
 
         final Runnable pitch = new Runnable() {
 
-
             @Override
             public void run() {
 
-                setGimbalAttitude(0, 30);
+                if(loopCount < pitches.length) {
+
+                    setGimbalAttitude(pitches[loopCount], 0);
+
+                    shootPanoWithGimbal();
+
+                    loopCount++;
+
+                } else {
+
+                    showToast("Done");
+
+                    // This is where we'd yaw the gimbal and start the pitches over
+
+                }
 
             }
 
         };
+
+        h.postDelayed(pitch, 3000);
+
+
+        /*final Runnable yaw = new Runnable() {
+
+            @Override
+            public void run() {
+
+            }
+
+        };*/
 
 
 
@@ -222,6 +245,8 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     }
 
     private void setGimbalAttitude(float pitch, float yaw) {
+
+        Log.d(TAG, "setGimbalAttitude called with pitch: " + pitch + " and yaw: " + yaw);
 
         DJIGimbalAngleRotation gimbalPitch = new DJIGimbalAngleRotation(true, pitch, DJIGimbalRotateDirection.Clockwise);
         DJIGimbalAngleRotation gimbalRoll = new DJIGimbalAngleRotation(false, 0, DJIGimbalRotateDirection.Clockwise);
@@ -232,7 +257,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                     @Override
                     public void onResult(DJIError error) {
                         if (error == null) {
-
+                            Log.d(TAG, "rotateGimbalByAngle success");
+                        } else {
+                            Log.d(TAG, "rotateGimbalByAngle error");
                         }
                     }
                 });
@@ -255,8 +282,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                     }
                 });
     }
-
-    private
 
     public void showToast(final String msg) {
         runOnUiThread(new Runnable() {
