@@ -150,9 +150,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                 @Override
                 public void onResult(DJIError error) {
                     if (error == null) {
-                        showToast("take photo: success");
+                        Log.d(TAG, "takePhoto: success");
                     } else {
-                        showToast(error.getDescription());
+                        Log.d(TAG, error.getDescription());
                     }
                 }
 
@@ -193,64 +193,145 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     }
 
-    private int loopCount = 0;
     // Setup our gimbal pitch/yaw angles
     final float[] pitches = new float[]{0, -30, -60};
-    final float[] yaws = new float[]{0, 60, 120, 180, 240, 300};
+    final float[] yaws = new float[]{0, 60, 120, 180, -120, -60};
 
+    private int pitchCount = 0;
+    private int yawCount = 0;
+
+    /*
+    Shoot a pano with gimbal only
+    The sequence is pitch gimbal, take photo, and repeat
+    Once the column is complete we then yaw the gimbal and repeat above
+    */
     private void shootPanoWithGimbal() {
+
+        Log.d(TAG, "shootPanoWithGimbal called, pitch count: " + pitchCount + ", yaw count: " + yawCount);
 
         final Handler h = new Handler();
 
-        final Runnable pitch = new Runnable() {
+        // Begin take photo
+        final Runnable photoThread = new Runnable() {
 
             @Override
             public void run() {
 
-                if(loopCount < pitches.length) {
+                Log.d(TAG, "Taking photo");
 
-                    setGimbalAttitude(pitches[loopCount], 0);
+                takePhoto();
 
+                // Increment the loop counter
+                pitchCount++;
+
+                // Move to next sequence
+                shootPanoWithGimbal();
+
+            }
+
+        };
+        // End take photo
+
+        // Yaw gimbal
+        final Runnable yawThread = new Runnable() {
+
+            @Override
+            public void run() {
+
+                if (yawCount < yaws.length) {
+
+                    // Yaw gimbal to next column
+                    yawGimbal(yaws[yawCount]);
+
+                    // Increment the yawCount
+                    yawCount++;
+
+                    // Move to next sequence
                     shootPanoWithGimbal();
-
-                    loopCount++;
 
                 } else {
 
-                    showToast("Done");
-
-                    // This is where we'd yaw the gimbal and start the pitches over
+                    Log.d(TAG, "Done with pano sequence");
 
                 }
 
             }
 
         };
+        // End yaw gimbal
 
-        h.postDelayed(pitch, 3000);
-
-
-        /*final Runnable yaw = new Runnable() {
+        // Pitch gimbal
+        final Runnable pitchThread = new Runnable() {
 
             @Override
             public void run() {
 
+                if (pitchCount < pitches.length) {
+
+                    Log.d(TAG, "Pitching gimbal to: " + pitches[pitchCount]);
+
+                    // Pitch with 0 yaw
+                    pitchGimbal(pitches[pitchCount]);
+
+                    // Delay and shoot photo
+                    h.postDelayed(photoThread, 3000);
+
+                } else if (yawCount < yaws.length) {
+
+                    Log.d(TAG, "Yawing gimbal to: " + yaws[yawCount]);
+
+                    // Column of photos is complete. Yaw the gimbal for the next column.
+                    h.postDelayed(yawThread, 1000);
+
+                    // Reset the pitch count before we begin the next column
+                    pitchCount = 0;
+
+                } else {
+
+                    yawCount = 0;
+                    pitchCount = 0;
+
+                    // Rest the gimbal
+                    resetGimbal();
+
+                    Log.d(TAG, "We're done!!!");
+
+                }
+
             }
 
-        };*/
+        };
+        // End pitch gimbal
 
-
+        // This is the entry point for each loop
+        h.postDelayed(pitchThread, 1000);
 
 
     }
 
-    private void setGimbalAttitude(float pitch, float yaw) {
+    private void pitchGimbal(float pitch) {
+
+        setGimbalAttitude(pitch, 0, true, false);
+
+    }
+
+    /*
+    When we yaw we want to reset the pitch to
+    zero as well. This is the start of a new column.
+     */
+    private void yawGimbal(float yaw) {
+
+        setGimbalAttitude(0, yaw, true, true);
+
+    }
+
+    private void setGimbalAttitude(float pitch, float yaw, boolean pitchEnabled, boolean yawEnabled) {
 
         Log.d(TAG, "setGimbalAttitude called with pitch: " + pitch + " and yaw: " + yaw);
 
-        DJIGimbalAngleRotation gimbalPitch = new DJIGimbalAngleRotation(true, pitch, DJIGimbalRotateDirection.Clockwise);
+        DJIGimbalAngleRotation gimbalPitch = new DJIGimbalAngleRotation(pitchEnabled, pitch, DJIGimbalRotateDirection.Clockwise);
         DJIGimbalAngleRotation gimbalRoll = new DJIGimbalAngleRotation(false, 0, DJIGimbalRotateDirection.Clockwise);
-        DJIGimbalAngleRotation gimbalYaw = new DJIGimbalAngleRotation(true, yaw, DJIGimbalRotateDirection.Clockwise);
+        DJIGimbalAngleRotation gimbalYaw = new DJIGimbalAngleRotation(yawEnabled, yaw, DJIGimbalRotateDirection.Clockwise);
 
         DJIConnection.getProductInstance().getGimbal().rotateGimbalByAngle(DJIGimbalRotateAngleMode.AbsoluteAngle, gimbalPitch, gimbalRoll, gimbalYaw,
                 new DJICommonCallbacks.DJICompletionCallback() {
