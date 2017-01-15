@@ -1,17 +1,27 @@
 package unmannedairlines.dronepan;
 
-import android.support.v7.app.AppCompatActivity;
+import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 import android.os.Bundle;
-import android.widget.SeekBar;
 
 public class SettingsActivity extends BaseActivity {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+    String modelName;
 
-        //SeekBar sb = (SeekBar)findViewById(R.id.yawAngleSeekBar);
-        
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        this.modelName = getIntent().getExtras().getString("modelName");
+        if (this.modelName == null || this.modelName.isEmpty())
+        {
+            this.modelName = "Default";
+        }
+
+        ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
+
+        Settings settings = SettingsManager.getInstance().getSettings(modelName);
+        binding.setVariable(BR.settings, settings);
     }
 }
