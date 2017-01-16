@@ -3,15 +3,6 @@ package unmannedairlines.dronepan;
 import android.app.Application;
 import android.content.Context;
 
-public class DronePanApplication extends Application {
+public class DronePanApplication extends DJIConnection {
 
-    private static Context context;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        context = getApplicationContext(); // Grab the Context you want.
-    }
-
-    public static Context getContext() { return context; }
 }

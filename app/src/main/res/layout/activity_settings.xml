@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <variable name="settings" type="unmannedairlines.dronepan.Settings"/>
+        <import type="android.view.View"/>
+        <variable name="settings" type="unmannedairlines.dronepan.Settings"/>   
     </data>
 
     <RelativeLayout
@@ -20,59 +21,111 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:padding="8dp"
+            android:gravity="top"
+            android:layout_marginTop="8dp">
 
             <TextView
-                android:text="Model Name Settings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="TextView"
-                android:layout_width="match_parent"
+                android:text="Settings"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/textView2" />
+                android:layout_gravity="center_horizontal"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:text="@{settings.modelName}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:text="Yaw angle: "
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:text="@{String.format(&quot;%.2f&quot;, settings.yawAngle)}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:text="Pitch angle: "
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"/>
+
+                <TextView
+                    android:text="@{String.format(&quot;%.2f&quot;, settings.pitchAngle)}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:text="Total photos: "
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"/>
+
+                <TextView
+                    android:text="@{String.valueOf(settings.numberOfPhotos)}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/versionInfoLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="8dp">
+
+            <TextView
+                android:text="DronePan Version 1.x.x"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/versionTextView"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_marginLeft="8dp"
+                android:text="SDK Version: x.x.x"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/sdkVersionTextView"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true" />
+
         </LinearLayout>
 
         <ScrollView
             android:layout_width="match_parent"
             android:scrollbarStyle="insideOverlay"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/headerLayout"
-            android:layout_height="match_parent">
+            android:layout_above="@+id/versionInfoLayout">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="8dp">
-
-                <!-- Number of photos per row -->
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:text="Number of photos per row: "
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@{String.valueOf(settings.photosPerRow)}"/>
-
-                </LinearLayout>
-
-                <SeekBar
-                    style="@style/Widget.AppCompat.SeekBar.Discrete"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:max="20"
-                    android:progress="@{settings.photosPerRow}"
-                    android:id="@+id/picturesPerRowSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"/>
 
                 <!-- Number of rows -->
 
@@ -83,6 +136,7 @@
 
                     <TextView
                         android:text="Number of rows: "
+                        android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
@@ -100,7 +154,38 @@
                     android:max="10"
                     android:progress="@{settings.numberOfRows}"
                     android:id="@+id/numberOfRowsSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"/>
+                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:layout_marginBottom="8dp"/>
+
+                <!-- Number of photos per row -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:text="Number of photos per row: "
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{String.valueOf(settings.photosPerRow)}"/>
+
+                </LinearLayout>
+
+                <SeekBar
+                    style="@style/Widget.AppCompat.SeekBar.Discrete"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="20"
+                    android:progress="@{settings.photosPerRow}"
+                    android:id="@+id/picturesPerRowSeekBar"
+                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:layout_marginBottom="8dp"/>
 
                 <!-- Number of nadir shots  -->
 
@@ -111,6 +196,7 @@
 
                     <TextView
                         android:text="Number of nadir shots: "
+                        android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
@@ -125,10 +211,11 @@
                     style="@style/Widget.AppCompat.SeekBar.Discrete"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:max="10"
+                    android:max="20"
                     android:progress="@{settings.numberOfNadirShots}"
                     android:id="@+id/numberOfNadirShotsSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"/>
+                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:layout_marginBottom="8dp"/>
 
                 <!-- Delay between photos -->
 
@@ -139,6 +226,7 @@
 
                     <TextView
                         android:text="Delay before each shot: "
+                        android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
@@ -150,62 +238,132 @@
                 </LinearLayout>
 
                 <SeekBar
-                    style="@style/Widget.AppCompat.SeekBar.Discrete"
+                    style="@style/Widget.AppCompat.SeekBar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:max="100"
+                    android:max="150"
                     android:progress="@{(int)(settings.delayBeforeEachShot * 10)}"
                     android:id="@+id/delayBeforeEachShotSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"/>
+                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:layout_marginBottom="8dp"/>
 
-                <Switch
-                    android:text="Units:"
-                    android:textOn="Use Imperial"
-                    android:textOff="Use Metric"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/imperialMetricSwitch"
-                    android:checked="@{settings.useImperial}"
-                    android:onCheckedChanged="@{settings.checkedChanged}"/>
+                    android:layout_marginBottom="8dp">
 
-                <Switch
-                    android:text="Photo Mode:"
-                    android:textOn="Use AEB"
-                    android:textOff="Normal"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerInParent="true">
+
+                        <TextView
+                            android:text="Units: "
+                            android:textStyle="bold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+
+                        <TextView
+                            android:text="Imperial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="@{settings.useImperial ? View.VISIBLE : View.GONE}"/>
+
+                        <TextView
+                            android:text="Metric"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="@{settings.useImperial ? View.GONE : View.VISIBLE}"/>
+
+                    </LinearLayout>
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/imperialMetricSwitch"
+                        android:checked="@{settings.useImperial}"
+                        android:onCheckedChanged="@{settings.checkedChanged}"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
+
+
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/aebSwitch"
-                    android:checked="@{settings.aebPhotoMode}"
-                    android:onCheckedChanged="@{settings.checkedChanged}" />
+                    android:layout_marginBottom="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerInParent="true">
+
+                        <TextView
+                            android:text="Photo mode: "
+                            android:textStyle="bold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                        <TextView
+                            android:text="AEB"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="@{settings.aebPhotoMode ? View.VISIBLE : View.GONE}"/>
+
+                        <TextView
+                            android:text="Normal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="@{settings.aebPhotoMode ? View.GONE : View.VISIBLE}"/>
+
+                    </LinearLayout>
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/aebSwitch"
+                        android:checked="@{settings.aebPhotoMode}"
+                        android:onCheckedChanged="@{settings.checkedChanged}"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center_horizontal">
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Save"
+                        android:id="@+id/saveSettingsButton"
+                        android:onClick="@{settings.onClicked}"/>
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Revert to defaults"
+                        android:id="@+id/cancelSettingsButton"
+                        android:onClick="@{settings.onClicked}"/>
+
+                </LinearLayout>
 
             </LinearLayout>
         </ScrollView>
 
-        <!--
-        <LinearLayout
+        <Button
+            android:id="@+id/goBackButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/settingsStatusBar"
-            android:gravity="bottom">
-
-            <TextView
-                android:text="DronePan Version 1.x.x"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/versionTextView"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true" />
-
-            <TextView
-                android:text="SDK Version: x.x.x"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/sdkVersionTextView"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true" />
-
-        </LinearLayout>
-        -->
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="Go Back"
+            android:layout_margin="8dp"/>
 
     </RelativeLayout>
 </layout>

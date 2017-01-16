@@ -3,6 +3,7 @@ package unmannedairlines.dronepan;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
@@ -35,16 +36,12 @@ public class Settings extends BaseObservable {
     {
         this.modelName = modelName;
 
-        photosPerRow = 10;
-        numberOfRows = 3;
-        numberOfNadirShots = 2;
-        delayBeforeEachShot = 1.5;
-        allowsAboveHorizon = false;
-        relativeGimbalYaw = false;
-        switchName = "F";
-        switchPosition = 3;
-        useImperial = false;
-        aebPhotoMode = false;
+        setDefaults();
+    }
+
+    @Bindable
+    public String getModelName() {
+        return modelName;
     }
 
     @Bindable
@@ -96,13 +93,14 @@ public class Settings extends BaseObservable {
 
     @Bindable
     public double getYawAngle() {
-        double yawAngle = 360.0 / getNumberOfPhotos();
+        double yawAngle = 360.0 / getPhotosPerRow();
         return yawAngle;
     }
 
     @Bindable
     public double getPitchAngle() {
-        double pitchAngle = 180.0 / getNumberOfRows();
+        double maxPitchAngle = this.allowsAboveHorizon ? 180.0 : 90.0;
+        double pitchAngle = maxPitchAngle / getNumberOfRows();
         return pitchAngle;
     }
 
@@ -217,6 +215,20 @@ public class Settings extends BaseObservable {
         }
     }
 
+    public void onClicked(View v)
+    {
+        switch (v.getId())
+        {
+            case R.id.saveSettingsButton:
+                saveToDisk();
+                break;
+
+            case R.id.cancelSettingsButton:
+                revertSettings();
+                break;
+        }
+    }
+
     public void loadFromDisk()
     {
         String jsonString = readJson();
@@ -259,6 +271,12 @@ public class Settings extends BaseObservable {
         catch (JSONException e)
         {
         }
+    }
+
+    public void revertSettings()
+    {
+        setDefaults();
+        SettingsManager.getInstance().revertSettings(this);
     }
 
     private String readJson()
@@ -310,5 +328,19 @@ public class Settings extends BaseObservable {
         String filename = this.modelName + ".settings";
         File file = new File(DronePanApplication.getContext().getFilesDir(), filename);
         return file;
+    }
+
+    private void setDefaults()
+    {
+        photosPerRow = 10;
+        numberOfRows = 3;
+        numberOfNadirShots = 2;
+        delayBeforeEachShot = 1.5;
+        allowsAboveHorizon = false;
+        relativeGimbalYaw = false;
+        switchName = "F";
+        switchPosition = 3;
+        useImperial = false;
+        aebPhotoMode = false;
     }
 }
