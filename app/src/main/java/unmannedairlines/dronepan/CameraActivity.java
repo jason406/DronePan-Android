@@ -47,6 +47,8 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private DJIFlightController flightController;
 
+    private Settings settings;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +83,10 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         batteryLabel = (TextView)findViewById(R.id.batteryLabel);
 
         try {
-            DJIConnection.getProductInstance().getBattery().setBatteryStateUpdateCallback(
+            DJIBaseProduct product = DJIConnection.getProductInstance();
+            settings = SettingsManager.getInstance().getSettings(product.getModel().name());
+
+            product.getBattery().setBatteryStateUpdateCallback(
                     new DJIBattery.DJIBatteryStateUpdateCallback() {
                         @Override
                         public void onResult(DJIBatteryState djiBatteryState) {
@@ -378,6 +383,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         switch (v.getId()) {
             case R.id.btn_settings:{
                 Intent intent = new Intent(CameraActivity.this, SettingsActivity.class);
+                intent.putExtra("modelName", getModelName());
                 startActivity(intent);
                 break;
             }
@@ -388,6 +394,21 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             default:
                 break;
         }
+    }
+
+    private String getModelName()
+    {
+        return "DJIAircraftModelNameMavicPro";
+
+        /*
+        DJIBaseProduct product = DJIConnection.getProductInstance();
+        if (product != null)
+        {
+            return product.getModel().name();
+        }
+
+        return "Default";
+        */
     }
 
     @Override

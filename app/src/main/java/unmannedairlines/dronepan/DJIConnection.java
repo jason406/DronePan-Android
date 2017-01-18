@@ -1,6 +1,7 @@
 package unmannedairlines.dronepan;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,6 +27,8 @@ import dji.common.error.DJISDKError;
 public class DJIConnection extends Application {
 
     public static final String FLAG_CONNECTION_CHANGE = "dji_connection_change";
+
+    private static Context context;
 
     private static DJIBaseProduct mProduct;
 
@@ -77,6 +80,8 @@ public class DJIConnection extends Application {
         mHandler = new Handler(Looper.getMainLooper());
         //This is used to start SDK services and initiate SDK.
         DJISDKManager.getInstance().initSDKManager(this, mDJISDKManagerCallback);
+
+        context = getApplicationContext(); // Grab the Context you want.
     }
 
     /**
@@ -170,5 +175,7 @@ public class DJIConnection extends Application {
             sendBroadcast(intent);
         }
     };
+
+    public static Context getContext() { return context; }
 
 }
