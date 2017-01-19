@@ -15,9 +15,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import dji.common.battery.DJIBatteryState;
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
+import dji.common.flightcontroller.DJIVirtualStickFlightControlData;
 import dji.common.flightcontroller.DJIVirtualStickYawControlMode;
 import dji.common.gimbal.DJIGimbalAngleRotation;
 import dji.common.gimbal.DJIGimbalRotateAngleMode;
@@ -48,6 +52,12 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     private DJIFlightController flightController;
 
     private Settings settings;
+
+    private Timer yawAircraftTimer;
+
+    private YawAircraftTask yawAircraftTask;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -167,32 +177,13 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private void startPano() {
 
-        flightController = DJIConnection.getAircraftInstance().getFlightController();
-
-        /*// Let's enable virtual stick control mode so we can send commands to the flight controller
-        flightController.enableVirtualStickControlMode(
-                new DJICommonCallbacks.DJICompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (error == null) {
-
-                            // Let's set the yaw mode to angle
-                            // DJIConnection.getAircraftInstance().getFlightController().setYawControlMode(DJIVirtualStickYawControlMode.Angle);
-
-                        } else {
-
-                            showToast("Error enabling virtual stick mode");
-
-                        }
-                    }
-                }
-        );*/
-
         // We need to reset the gimbal first
         resetGimbal();
 
         // For I1 and I2 users
-        shootPanoWithGimbal();
+        //shootPanoWithGimbal();
+
+        shootPanoWithAircraft();
 
         Log.e(TAG, "Starting pano");
 
@@ -310,6 +301,42 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         // This is the entry point for each loop
         h.postDelayed(pitchThread, 1000);
+
+
+    }
+
+    private void shootPanoWithAircraft() {
+
+        Settings settings = new Settings("Inspire 1");
+
+        settings.getNumberOfRows();
+
+        flightController = DJIConnection.getAircraftInstance().getFlightController();
+
+        // Let's enable virtual stick control mode so we can send commands to the flight controller
+        flightController.enableVirtualStickControlMode(
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        if (error == null) {
+
+                            // Let's set the yaw mode to angle
+                            flightController.setYawControlMode(DJIVirtualStickYawControlMode.Angle);
+
+                            if (yawAircraftTimer == null) {
+                                yawAircraftTask = new YawAircraftTask();
+                                yawAircraftTimer = new Timer();
+                                yawAircraftTimer.schedule(yawAircraftTask, 0, 200);
+                            }
+
+                        } else {
+
+                            showToast("Error enabling virtual stick mode");
+
+                        }
+                    }
+                }
+        );
 
 
     }
@@ -435,5 +462,26 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         }
 
         return false;
+    }
+
+    class YawAircraftTask extends TimerTask {
+
+        @Override
+        public void run() {
+
+            DJIFlightController fc = DJIConnection.getAircraftInstance().getFlightController();
+            if (fc != null) {
+                fc.sendVirtualStickFlightControlData(
+                        new DJIVirtualStickFlightControlData(
+                                0, 0, 60, 0
+                        ), new DJICommonCallbacks.DJICompletionCallback() {
+                            @Override
+                            public void onResult(DJIError djiError) {
+
+                            }
+                        }
+                );
+            }
+        }
     }
 }
