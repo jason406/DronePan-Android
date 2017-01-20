@@ -829,17 +829,13 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private String getModelName()
     {
-        return "DJIAircraftModelNameMavicPro";
-
-        /*
         DJIBaseProduct product = DJIConnection.getProductInstance();
         if (product != null)
         {
             return product.getModel().name();
         }
 
-        return "Default";
-        */
+        return "Unknown";
     }
 
     @Override
