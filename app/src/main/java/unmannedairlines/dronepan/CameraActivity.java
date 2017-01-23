@@ -1,11 +1,10 @@
 package unmannedairlines.dronepan;
 
+
 import android.content.Intent;
 import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
-import android.media.audiofx.BassBoost;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
@@ -15,13 +14,17 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import dji.common.battery.DJIBatteryState;
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
+import dji.common.flightcontroller.DJIFlightControllerCurrentState;
+import dji.common.flightcontroller.DJIFlightControllerDataType;
 import dji.common.flightcontroller.DJIVirtualStickFlightControlData;
+import dji.common.flightcontroller.DJIVirtualStickVerticalControlMode;
 import dji.common.flightcontroller.DJIVirtualStickYawControlMode;
 import dji.common.gimbal.DJIGimbalAngleRotation;
 import dji.common.gimbal.DJIGimbalRotateAngleMode;
@@ -31,8 +34,20 @@ import dji.common.util.DJICommonCallbacks;
 import dji.sdk.base.DJIBaseProduct;
 import dji.sdk.battery.DJIBattery;
 import dji.sdk.camera.DJICamera;
+import dji.sdk.camera.DJIMedia;
 import dji.sdk.codec.DJICodecManager;
+import dji.sdk.flightcontroller.DJICompass;
 import dji.sdk.flightcontroller.DJIFlightController;
+import dji.sdk.flightcontroller.DJIFlightControllerDelegate;
+import dji.sdk.missionmanager.DJICustomMission;
+import dji.sdk.missionmanager.DJIMission;
+import dji.sdk.missionmanager.DJIMissionManager;
+import dji.sdk.missionmanager.DJIPanoramaMission;
+import dji.sdk.missionmanager.missionstep.DJIAircraftYawStep;
+import dji.sdk.missionmanager.missionstep.DJIGimbalAttitudeStep;
+import dji.sdk.missionmanager.missionstep.DJIMissionStep;
+import dji.sdk.missionmanager.missionstep.DJIShootPhotoStep;
+import dji.sdk.products.DJIAircraft;
 
 public class CameraActivity extends BaseActivity implements TextureView.SurfaceTextureListener, View.OnClickListener {
 
@@ -49,14 +64,19 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private TextView batteryLabel;
 
+    private TextView sequenceLabel;
+
     private DJIFlightController flightController;
+
+    private DJICompass compass;
+
+    private Double aircraftHeading;
 
     private Settings settings;
 
     private Timer yawAircraftTimer;
 
     private YawAircraftTask yawAircraftTask;
-
 
 
     @Override
@@ -91,23 +111,71 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         mSettingsBtn.setOnClickListener(this);
 
         batteryLabel = (TextView)findViewById(R.id.batteryLabel);
+        sequenceLabel = (TextView)findViewById(R.id.sequenceLabel);
 
+    }
+
+    // Putting these callbacks in here because that's what DJI does in their sample code
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        // Setup the battery listener
         try {
             DJIBaseProduct product = DJIConnection.getProductInstance();
-            settings = SettingsManager.getInstance().getSettings(product.getModel().name());
+            //settings = SettingsManager.getInstance().getSettings(product.getModel().name());
 
             product.getBattery().setBatteryStateUpdateCallback(
                     new DJIBattery.DJIBatteryStateUpdateCallback() {
                         @Override
                         public void onResult(DJIBatteryState djiBatteryState) {
 
-                            //batteryLabel.setText("Battery: " + djiBatteryState.getBatteryEnergyRemainingPercent() + "%");
+                            final DJIBatteryState batteryState = djiBatteryState;
+
+                            runOnUiThread(new Thread(new Runnable() {
+                                public void run() {
+                                    batteryLabel.setText("Battery: " + batteryState.getBatteryEnergyRemainingPercent() + "%");
+                                }
+                            }));
 
                         }
                     }
             );
         } catch (Exception e) {
 
+            showToast("Error setting up battery listener");
+
+        }
+
+        // Setup the flight controller listener
+        flightController = DJIConnection.getAircraftInstance().getFlightController();
+
+        if (flightController != null) {
+
+            flightController.setUpdateSystemStateCallback(
+                    new DJIFlightControllerDelegate.FlightControllerUpdateSystemStateCallback() {
+                        @Override
+                        public void onResult(DJIFlightControllerCurrentState
+                                                     djiFlightControllerCurrentState) {
+                            if (compass != null) {
+
+                                aircraftHeading = compass.getHeading();
+
+                                runOnUiThread(new Thread(new Runnable() {
+                                    public void run() {
+                                        sequenceLabel.setText("Heading  : " + aircraftHeading);
+                                    }
+                                }));
+
+                            }
+                        }
+                    });
+
+            if (DJIConnection.isCompassAvailable()) {
+
+                compass = flightController.getCompass();
+
+            }
         }
 
     }
@@ -183,7 +251,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         // For I1 and I2 users
         //shootPanoWithGimbal();
 
-        shootPanoWithAircraft();
+        shootPanoWithAircraftAndCustomMission();
 
         Log.e(TAG, "Starting pano");
 
@@ -320,7 +388,10 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                     public void onResult(DJIError error) {
                         if (error == null) {
 
-                            // Let's set the yaw mode to angle
+                            // Set vertical control mode to velocity so that when we send a value of 0 it won't descend
+                            flightController.setVerticalControlMode(DJIVirtualStickVerticalControlMode.Velocity);
+
+                            // Let's set the yaw mode to angle - angles are relative to the front of the aircraft
                             flightController.setYawControlMode(DJIVirtualStickYawControlMode.Angle);
 
                             if (yawAircraftTimer == null) {
@@ -338,6 +409,134 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                 }
         );
 
+
+    }
+
+    private void shootPanoWithAircraftAndCustomMission() {
+
+        final DJIMissionManager missionManager = DJIMissionManager.getInstance();
+
+        LinkedList<DJIMissionStep> steps = new LinkedList<DJIMissionStep>();
+
+        // Pitch gimbal to 0
+        steps.add(new DJIGimbalAttitudeStep(DJIGimbalRotateAngleMode.AbsoluteAngle,
+                new DJIGimbalAngleRotation(true, 0f, DJIGimbalRotateDirection.Clockwise), null, null,
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        // Handle pitch gimbal error here
+                    }
+                }));
+
+        // Take a photo
+        steps.add(new DJIShootPhotoStep(new DJICommonCallbacks.DJICompletionCallback() {
+
+            @Override
+            public void onResult(DJIError error) {
+                // Handle photo error here
+            }
+        }));
+
+        // Pitch gimbal to -30
+        steps.add(new DJIGimbalAttitudeStep(DJIGimbalRotateAngleMode.AbsoluteAngle,
+                new DJIGimbalAngleRotation(true, -30f, DJIGimbalRotateDirection.Clockwise), null, null,
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        // Handle pitch gimbal error here
+                    }
+                }));
+
+        // Take a photo
+        steps.add(new DJIShootPhotoStep(new DJICommonCallbacks.DJICompletionCallback() {
+
+            @Override
+            public void onResult(DJIError error) {
+                // Handle photo error here
+            }
+        }));
+
+        // Pitch gimbal to -60
+        steps.add(new DJIGimbalAttitudeStep(DJIGimbalRotateAngleMode.AbsoluteAngle,
+                new DJIGimbalAngleRotation(true, -60f, DJIGimbalRotateDirection.Clockwise), null, null,
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        // Handle pitch gimbal error here
+                    }
+                }));
+
+        // Take a photo
+        steps.add(new DJIShootPhotoStep(new DJICommonCallbacks.DJICompletionCallback() {
+
+            @Override
+            public void onResult(DJIError error) {
+                // Handle photo error here
+            }
+        }));
+
+        // Yaw aircraft with angle and angular velocity
+        steps.add(new DJIAircraftYawStep(60, 20, new DJICommonCallbacks.DJICompletionCallback() {
+
+            @Override
+            public void onResult(DJIError error) {
+                // Handle yaw aircraft error here
+            }
+
+        }));
+
+        // Load the steps into a cusstom mission
+        DJICustomMission customMission = new DJICustomMission(steps);
+
+        // Prepare the mission
+        missionManager.prepareMission(customMission, new DJIMission.DJIMissionProgressHandler() {
+
+            @Override
+            public void onProgress(DJIMission.DJIProgressType type, float progress) {
+                //setProgressBar((int)(progress * 100f));
+            }
+
+        }, new DJICommonCallbacks.DJICompletionCallback() {
+            @Override
+            public void onResult(DJIError error) {
+                if (error == null) {
+
+                    // Success preparing mission, let's start the mission
+                    missionManager.startMissionExecution(new DJICommonCallbacks.DJICompletionCallback() {
+
+                        @Override
+                        public void onResult(DJIError mError) {
+
+                            if (mError == null) {
+
+                                // Success starting mission
+                                Log.d(TAG, "Starting mission");
+
+                            } else {
+
+                                // Error starting mission
+                                Log.d(TAG, "Error starting mission");
+
+                            }
+                        }
+                    });
+
+                } else {
+                    // Error preparing mission
+                    Log.d(TAG, "Error preparing mission");
+                }
+            }
+        });
+
+
+
+
+
+    }
+
+    private void shootPanoWithGimbalAndCustomMission() {
+
+        LinkedList<DJIMissionStep> steps = new LinkedList<DJIMissionStep>();
 
     }
 
@@ -464,10 +663,14 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         return false;
     }
 
+
+
     class YawAircraftTask extends TimerTask {
 
         @Override
         public void run() {
+
+            Log.d(TAG, "task is running");
 
             DJIFlightController fc = DJIConnection.getAircraftInstance().getFlightController();
             if (fc != null) {
