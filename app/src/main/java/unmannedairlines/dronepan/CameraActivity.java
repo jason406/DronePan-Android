@@ -246,12 +246,12 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     private void startPano() {
 
         // We need to reset the gimbal first
-        resetGimbal();
+        //resetGimbal();
 
         // For I1 and I2 users
         //shootPanoWithGimbal();
 
-        shootPanoWithAircraftAndCustomMission();
+        shootPanoWithGimbalAndCustomMission();
 
         Log.e(TAG, "Starting pano");
 
@@ -419,14 +419,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         LinkedList<DJIMissionStep> steps = new LinkedList<DJIMissionStep>();
 
         // Pitch gimbal to 0
-        steps.add(new DJIGimbalAttitudeStep(DJIGimbalRotateAngleMode.AbsoluteAngle,
-                new DJIGimbalAngleRotation(true, 0f, DJIGimbalRotateDirection.Clockwise), null, null,
-                new DJICommonCallbacks.DJICompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        // Handle pitch gimbal error here
-                    }
-                }));
+        //steps.add();
 
         // Take a photo
         steps.add(new DJIShootPhotoStep(new DJICommonCallbacks.DJICompletionCallback() {
@@ -528,17 +521,138 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             }
         });
 
+    }
 
+    private void prepareAndStartCustomMission(LinkedList<DJIMissionStep> steps) {
 
+        Log.d(TAG, "shootPanoWithGimbalAndCustomMission");
 
+        final DJIMissionManager missionManager = DJIMissionManager.getInstance();
+
+        // Load the steps into a cusstom mission
+        DJICustomMission customMission = new DJICustomMission(steps);
+
+        // Prepare the mission
+        missionManager.prepareMission(customMission, new DJIMission.DJIMissionProgressHandler() {
+
+            @Override
+            public void onProgress(DJIMission.DJIProgressType type, float progress) {
+                //setProgressBar((int)(progress * 100f));
+            }
+
+        }, new DJICommonCallbacks.DJICompletionCallback() {
+            @Override
+            public void onResult(DJIError error) {
+                if (error == null) {
+
+                    // Success preparing mission, let's start the mission
+                    missionManager.startMissionExecution(new DJICommonCallbacks.DJICompletionCallback() {
+
+                        @Override
+                        public void onResult(DJIError mError) {
+
+                            if (mError == null) {
+
+                                // Success starting mission
+                                Log.d(TAG, "Starting mission");
+
+                            } else {
+
+                                // Error starting mission
+                                Log.d(TAG, "Error starting mission");
+
+                            }
+                        }
+                    });
+
+                } else {
+                    // Error preparing mission
+                    Log.d(TAG, "Error preparing mission");
+                }
+            }
+        });
 
     }
 
     private void shootPanoWithGimbalAndCustomMission() {
 
+        Log.d(TAG, "shootPanoWithGimbalAndCustomMission");
+
         LinkedList<DJIMissionStep> steps = new LinkedList<DJIMissionStep>();
 
+        steps.add(pitchYawGimbalStep(0, 0));
+        steps.add(photoStep());
+        steps.add(pitchGimbalStep(10f));
+        steps.add(photoStep());
+        steps.add(pitchGimbalStep(20f));
+        steps.add(photoStep());
+        steps.add(pitchYawGimbalStep(0, 60));
+
+
+        prepareAndStartCustomMission(steps);
+
     }
+
+    private DJIGimbalAttitudeStep pitchYawGimbalStep(float pitch, float yaw) {
+
+        return new DJIGimbalAttitudeStep(DJIGimbalRotateAngleMode.AbsoluteAngle,
+                new DJIGimbalAngleRotation(true, pitch, DJIGimbalRotateDirection.Clockwise),
+                null,
+                new DJIGimbalAngleRotation(true, yaw, DJIGimbalRotateDirection.Clockwise),
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        // Handle pitch gimbal error here
+                    }
+                });
+
+    }
+
+    private DJIGimbalAttitudeStep pitchGimbalStep(float pitch) {
+
+        return new DJIGimbalAttitudeStep(DJIGimbalRotateAngleMode.AbsoluteAngle,
+                new DJIGimbalAngleRotation(true, pitch, DJIGimbalRotateDirection.Clockwise),
+                null,
+                null,
+                new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+
+                        if (error == null) {
+
+                            Log.d(TAG, "Pitch gimbal successful");
+
+                        } else {
+
+                            Log.d(TAG, "Error pitching gimbal");
+
+                        }
+
+                    }
+                });
+    }
+
+    private DJIShootPhotoStep photoStep() {
+
+        return new DJIShootPhotoStep(new DJICommonCallbacks.DJICompletionCallback() {
+
+            @Override
+            public void onResult(DJIError error) {
+
+                if (error == null) {
+
+                    Log.d(TAG, "Shoot photo successful");
+
+                } else {
+
+                    Log.d(TAG, "Error shooting photo");
+
+                }
+            }
+        });
+    }
+
+
 
     private void pitchGimbal(float pitch) {
 
