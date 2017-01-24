@@ -3,6 +3,7 @@ package unmannedairlines.dronepan;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
+import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
@@ -19,8 +20,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import dji.common.product.Model;
+
 public class Settings extends BaseObservable {
-    private String modelName;
+    private static final String TAG = Settings.class.getName();
+
+    private Model model;
 
     private int photosPerRow;
     private int numberOfRows;
@@ -33,16 +38,21 @@ public class Settings extends BaseObservable {
     private String switchName;
     private int switchPosition;
 
-    public Settings(String modelName)
+    public Settings(Model model)
     {
-        this.modelName = modelName;
+        this.model = model;
 
         setDefaults();
     }
 
+    public Model getModel()
+    {
+        return model;
+    }
+
     @Bindable
-    public String getModelName() {
-        return modelName;
+    public String getModelDisplayName() {
+        return model.getDisplayName();
     }
 
     @Bindable
@@ -93,15 +103,15 @@ public class Settings extends BaseObservable {
     }
 
     @Bindable
-    public double getYawAngle() {
-        double yawAngle = 360.0 / getPhotosPerRow();
+    public float getYawAngle() {
+        float yawAngle = 360.0f / getPhotosPerRow();
         return yawAngle;
     }
 
     @Bindable
-    public double getPitchAngle() {
-        double maxPitchAngle = this.allowsAboveHorizon ? 180.0 : 90.0;
-        double pitchAngle = maxPitchAngle / getNumberOfRows();
+    public float getPitchAngle() {
+        float maxPitchAngle = this.allowsAboveHorizon ? 180.0f : 90.0f;
+        float pitchAngle = maxPitchAngle / getNumberOfRows();
         return pitchAngle;
     }
 
@@ -208,11 +218,7 @@ public class Settings extends BaseObservable {
 
             case R.id.aebSwitch:
                 setAebPhotoMode(isChecked);
-        }
-        if (isChecked) {
-            // do something when check is selected
-        } else {
-            //do something when unchecked
+                break;
         }
     }
 
@@ -251,6 +257,7 @@ public class Settings extends BaseObservable {
         }
         catch (JSONException e)
         {
+            Log.e(TAG, "Could not parse JSON.", e);
         }
     }
 
@@ -271,6 +278,7 @@ public class Settings extends BaseObservable {
         }
         catch (JSONException e)
         {
+            Log.e(TAG, "Could not create JSON.", e);
         }
     }
 
@@ -302,9 +310,11 @@ public class Settings extends BaseObservable {
             }
             catch (FileNotFoundException e)
             {
+                Log.e(TAG, "Could not open file.", e);
             }
             catch (IOException e)
             {
+                Log.e(TAG, "Unexpected IO error.", e);
             }
         }
 
@@ -320,16 +330,17 @@ public class Settings extends BaseObservable {
             outputStream.write(json.getBytes());
             outputStream.close();
 
-            Toast.makeText(DronePanApplication.getContext(), "Settings saved succesfully.", Toast.LENGTH_LONG).show();
+            Toast.makeText(DronePanApplication.getContext(), "Settings saved successfully.", Toast.LENGTH_LONG).show();
         }
         catch (Exception e) {
-            Toast.makeText(DronePanApplication.getContext(), "Could not save setting.", Toast.LENGTH_LONG).show();
+            Toast.makeText(DronePanApplication.getContext(), "Could not save settings.", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Saving to JSON failed.", e);
         }
     }
 
     private File getFile()
     {
-        String filename = this.modelName + ".settings";
+        String filename = this.model.name() + ".settings";
         File file = new File(DronePanApplication.getContext().getFilesDir(), filename);
         return file;
     }

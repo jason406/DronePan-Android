@@ -78,7 +78,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private YawAircraftTask yawAircraftTask;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +122,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         // Setup the battery listener
         try {
             DJIBaseProduct product = DJIConnection.getProductInstance();
-            //settings = SettingsManager.getInstance().getSettings(product.getModel().name());
+            settings = SettingsManager.getInstance().getSettings(product.getModel());
 
             product.getBattery().setBatteryStateUpdateCallback(
                     new DJIBattery.DJIBatteryStateUpdateCallback() {
@@ -248,21 +247,54 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         // We need to reset the gimbal first
         //resetGimbal();
 
-        // For I1 and I2 users
-        //shootPanoWithGimbal();
+        // Precalcuate panorama parameters.
+        setupPanoramaShoot();
 
-        shootPanoWithGimbalAndCustomMission();
+        if (!settings.getRelativeGimbalYaw()) {
+            shootPanoWithGimbalAndCustomMission();
+        }
+        else {
+            shootPanoWithAircraft();
+        }
 
         Log.e(TAG, "Starting pano");
-
     }
 
     // Setup our gimbal pitch/yaw angles
-    final float[] pitches = new float[]{0, -30, -60};
-    final float[] yaws = new float[]{0, 60, 120, 180, -120, -60};
+    float[] pitches;
+    float[] yaws;
 
     private int pitchCount = 0;
     private int yawCount = 0;
+
+    private void setupPanoramaShoot()
+    {
+        pitchCount = 0;
+        yawCount = 0;
+
+        float pitchAngle = settings.getPitchAngle();
+        float yawAngle = settings.getYawAngle();
+
+        pitches = new float[settings.getNumberOfRows()];
+        for (int i = 0; i < pitches.length; i++)
+        {
+            pitches[i] = i * pitchAngle;
+            if (pitches[i] > 180)
+            {
+                pitches[i] -= 360;
+            }
+        }
+
+        yaws = new float[settings.getPhotosPerRow()];
+        for (int i = 0; i < yaws.length; i++)
+        {
+            yaws[i] = i * yawAngle;
+            if (yaws[i] > 180)
+            {
+                yaws[i] -= 360;
+            }
+        }
+    }
 
     /*
     Shoot a pano with gimbal only
@@ -373,12 +405,8 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     }
 
-    private void shootPanoWithAircraft() {
-
-        Settings settings = new Settings("Inspire 1");
-
-        settings.getNumberOfRows();
-
+    private void shootPanoWithAircraft()
+    {
         flightController = DJIConnection.getAircraftInstance().getFlightController();
 
         // Let's enable virtual stick control mode so we can send commands to the flight controller
@@ -699,14 +727,14 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         DJIGimbalAngleRotation gimbalYaw = new DJIGimbalAngleRotation(true, 0, DJIGimbalRotateDirection.Clockwise);
 
         DJIConnection.getProductInstance().getGimbal().rotateGimbalByAngle(DJIGimbalRotateAngleMode.AbsoluteAngle, gimbalPitch, gimbalRoll, gimbalYaw,
-                new DJICommonCallbacks.DJICompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (error == null) {
+            new DJICommonCallbacks.DJICompletionCallback() {
+                @Override
+                public void onResult(DJIError error) {
+                    if (error == null) {
 
-                        }
                     }
-                });
+                }
+            });
     }
 
     public void showToast(final String msg) {
@@ -723,7 +751,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         switch (v.getId()) {
             case R.id.btn_settings:{
                 Intent intent = new Intent(CameraActivity.this, SettingsActivity.class);
-                intent.putExtra("modelName", getModelName());
                 startActivity(intent);
                 break;
             }
@@ -734,17 +761,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             default:
                 break;
         }
-    }
-
-    private String getModelName()
-    {
-        DJIBaseProduct product = DJIConnection.getProductInstance();
-        if (product != null)
-        {
-            return product.getModel().name();
-        }
-
-        return "Unknown";
     }
 
     @Override
