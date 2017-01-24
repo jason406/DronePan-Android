@@ -111,7 +111,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         batteryLabel = (TextView)findViewById(R.id.batteryLabel);
         sequenceLabel = (TextView)findViewById(R.id.sequenceLabel);
-
     }
 
     // Putting these callbacks in here because that's what DJI does in their sample code
@@ -175,13 +174,11 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         }
                     });
 
-            /* @dbaldwin: Function missing in DJIConnection.
             if (DJIConnection.isCompassAvailable()) {
 
                 compass = flightController.getCompass();
 
             }
-            */
         }
 
     }
