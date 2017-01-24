@@ -70,9 +70,27 @@ public class DJIConnection extends Application {
         return camera;
     }
 
+    public static boolean isAircraft() {
+        return DJIConnection.getProductInstance() instanceof DJIAircraft;
+    }
+
+    public static boolean isProductModuleAvailable() {
+        return (null != DJIConnection.getProductInstance());
+    }
+
     public static synchronized DJIAircraft getAircraftInstance() {
         if (!isAircraftConnected()) return null;
         return (DJIAircraft) getProductInstance();
+    }
+
+    public static boolean isFlightControllerAvailable() {
+        return isProductModuleAvailable() && isAircraft() &&
+                (null != DJIConnection.getAircraftInstance().getFlightController());
+    }
+
+    public static boolean isCompassAvailable() {
+        return isFlightControllerAvailable() && isAircraft() &&
+                (null != DJIConnection.getAircraftInstance().getFlightController().getCompass());
     }
 
     @Override
