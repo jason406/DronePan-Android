@@ -175,11 +175,13 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         }
                     });
 
+            /* @dbaldwin: Function missing in DJIConnection.
             if (DJIConnection.isCompassAvailable()) {
 
                 compass = flightController.getCompass();
 
             }
+            */
         }
 
     }
