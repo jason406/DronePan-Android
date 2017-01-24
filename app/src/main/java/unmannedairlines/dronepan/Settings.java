@@ -6,6 +6,7 @@ import android.databinding.Bindable;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -318,8 +319,11 @@ public class Settings extends BaseObservable {
             FileOutputStream outputStream = DronePanApplication.getContext().openFileOutput(file.getName(), Context.MODE_PRIVATE);
             outputStream.write(json.getBytes());
             outputStream.close();
+
+            Toast.makeText(DronePanApplication.getContext(), "Settings saved succesfully.", Toast.LENGTH_LONG).show();
         }
         catch (Exception e) {
+            Toast.makeText(DronePanApplication.getContext(), "Could not save setting.", Toast.LENGTH_LONG).show();
         }
     }
 
