@@ -286,6 +286,7 @@ public class Settings extends BaseObservable {
     {
         setDefaults();
         SettingsManager.getInstance().revertSettings(this);
+        Toast.makeText(DronePanApplication.getContext(), "Settings reverted.", Toast.LENGTH_LONG).show();
     }
 
     private String readJson()
