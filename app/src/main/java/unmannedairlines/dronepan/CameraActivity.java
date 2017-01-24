@@ -146,6 +146,11 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         }
 
+        // If we are testing on the emulator, just return here an don't execute the code below.
+        if (DronePanApplication.isRunningOnEmulator()) {
+            return;
+        }
+
         // Setup the flight controller listener
         flightController = DJIConnection.getAircraftInstance().getFlightController();
 

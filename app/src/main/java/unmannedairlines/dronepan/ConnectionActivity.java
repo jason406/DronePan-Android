@@ -58,8 +58,9 @@ public class ConnectionActivity extends BaseActivity {
         mTextConnectionStatus = (TextView) findViewById(R.id.text_connection_status);
 
         // For testing in emulator
-        //launchCameraActivity();
-
+        if (DronePanApplication.isRunningOnEmulator()) {
+            launchCameraActivity();
+        }
     }
 
     @Override
