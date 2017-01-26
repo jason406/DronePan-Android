@@ -163,12 +163,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                                 aircraftHeading = compass.getHeading();
 
-                                runOnUiThread(new Thread(new Runnable() {
-                                    public void run() {
-                                        sequenceLabel.setText("Heading  : " + aircraftHeading);
-                                    }
-                                }));
-
                             }
                         }
                     });
@@ -193,14 +187,18 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                     Log.d(TAG, "Mission finished successfully");
 
+
                     // This will loop 6 times and take 6 shots hopefully
-                    if(missionYawCount < 6) {
+                    if (missionYawCount < 6) {
 
-                        takePhotoWithDelay(1000);
+                        shootColumn();
 
-                        shootPanoWithAircraftYawCustomMission();
+                    } else {
 
-                        missionYawCount++;
+                        showToast("Panorama completed successfully!");
+
+                        resetGimbal();
+
                     }
 
                 } else {
@@ -274,7 +272,17 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         @Override
                         public void onResult(DJIError error) {
                             if (error == null) {
-                                Log.d(TAG, "takePhoto: success");
+
+                                photos_taken_count++;
+
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        sequenceLabel.setText("Photo: " + photos_taken_count + "/19");
+                                    }
+                                });
+
+                                Log.d(TAG, "takePhotoWithDelay: success");
+
                             } else {
                                 Log.d(TAG, error.getDescription());
                             }
@@ -299,9 +307,11 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         resetGimbal();
 
-        shootPanoWithAircraftYawCustomMission();
+        shootColumn();
 
-        Log.e(TAG, "Starting pano");
+        //shootPanoWithAircraftYawCustomMission();
+
+        showToast("Starting panorama");
 
     }
 
@@ -510,16 +520,14 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     }
 
-    private void shootPanoWithAircraftYawCustomMission() {
+    private void yawAircraftCustomMission() {
 
         Log.d(TAG, "shootPanoWithAircraftYawCutomMission");
 
         LinkedList<DJIMissionStep> steps = new LinkedList<DJIMissionStep>();
 
-
         steps.add(yawAircraftStep(60));
         prepareAndStartCustomMission(steps);
-
 
         // This should work but doesn't - bug in DJI SDK 3.5.
         /*steps.add(pitchYawGimbalStep(0, 0));
@@ -659,8 +667,84 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         });
     }
 
+    int pitch_range = -90; // So we pitch the gimbal down
+    int photos_per_column = 3;
+    int pitch_angle = pitch_range / photos_per_column;
+    int column_counter = 0;
+    int photos_taken_count = 0;
+
+    // The goal here is to shoot a column of photos regardless of aircraft or gimbal yaw approach
+    // The sequence is pitch, shoot, pitch, shoot, etc
+    // Let's not shoot the nadir photo here
+    private void shootColumn() {
+
+        final Handler h = new Handler();
+
+        final Runnable photoThread = new Runnable() {
+
+            @Override
+            public void run() {
+
+                Log.d(TAG, "Taking photo");
+
+                // Take the photo with no delay
+                takePhotoWithDelay(0);
+
+                // Increment the column counter
+                column_counter++;
+
+                // Loop again
+                shootColumn();
+
+            }
+
+        };
+
+        final Runnable pitchThread = new Runnable() {
+
+            @Override
+            public void run() {
+
+                if (column_counter < photos_per_column) {
+
+                    float angle = pitch_angle * column_counter;
+
+                    Log.d(TAG, "Pitching gimbal to: " + angle);
+
+                    pitchGimbal(angle);
+
+                    // Give the gimbal 1.5 seconds to pitch before we take the photo
+                    h.postDelayed(photoThread, 1500);
+
+                // We've done a full column so let's yaw the gimbal or aircraft
+                } else {
+
+                    column_counter = 0;
+
+                    missionYawCount++;
+
+                    // Now yaw
+                    yawAircraftCustomMission();
+
+                    Log.d(TAG, "Yawing to new position");
+
+                }
 
 
+            }
+
+        };
+
+        // Delay three seconds because this will get called after a photo and we want to delay
+        // This logic will need to be cleaned up to pitch only after we've written a file to the
+        // SD card
+        h.postDelayed(pitchThread, 3000);
+
+    }
+
+
+
+    // Pitch gimbal to specific angle
     private void pitchGimbal(float pitch) {
 
         setGimbalAttitude(pitch, 0, true, false);
