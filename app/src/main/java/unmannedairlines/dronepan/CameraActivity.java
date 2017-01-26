@@ -121,8 +121,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         // Setup the battery listener
         try {
             DJIBaseProduct product = DJIConnection.getProductInstance();
-            settings = SettingsManager.getInstance().getSettings(product.getModel());
-
             product.getBattery().setBatteryStateUpdateCallback(
                     new DJIBattery.DJIBatteryStateUpdateCallback() {
                         @Override
@@ -223,7 +221,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         }
     }
 
-    private void takePhoto(){
+    private void takePhoto() {
 
         //DJICameraSettingsDef.CameraMode cameraMode = DJICameraSettingsDef.CameraMode.ShootPhoto;
 
@@ -249,7 +247,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     private void startPano() {
 
         // We need to reset the gimbal first
-        //resetGimbal();
+        resetGimbal();
 
         // Precalcuate panorama parameters.
         setupPanoramaShoot();
@@ -273,6 +271,8 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private void setupPanoramaShoot()
     {
+        settings = SettingsManager.getInstance().getSettings(DJIConnection.getModelSafely());
+
         pitchCount = 0;
         yawCount = 0;
 
