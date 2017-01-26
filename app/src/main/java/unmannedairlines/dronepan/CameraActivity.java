@@ -119,9 +119,10 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        DJIBaseProduct product = DJIConnection.getProductInstance();
+        
         // Setup the battery listener
         try {
-            DJIBaseProduct product = DJIConnection.getProductInstance();
             product.getBattery().setBatteryStateUpdateCallback(
                     new DJIBattery.DJIBatteryStateUpdateCallback() {
                         @Override
