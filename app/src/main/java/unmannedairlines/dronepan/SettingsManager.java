@@ -1,6 +1,7 @@
 package unmannedairlines.dronepan;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.dd.plist.NSDictionary;
 import com.dd.plist.NSNumber;
@@ -12,7 +13,10 @@ import com.dd.plist.PropertyListParser;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import dji.common.product.Model;
+
 public class SettingsManager {
+    private static final String TAG = SettingsManager.class.getName();
 
     private static SettingsManager instance;
     public static SettingsManager getInstance()
@@ -46,23 +50,23 @@ public class SettingsManager {
             InputStream stream = c.getResources().openRawResource(R.raw.models);
             modelOverrides = (NSDictionary) PropertyListParser.parse(stream);
             defaults = (NSDictionary) modelOverrides.get("defaults");
-        } catch (Exception ex) {
-
+        } catch (Exception e) {
+            Log.e(TAG, "Could not load model configurations.", e);
         }
     }
 
-    public Settings getSettings(String modelName)
+    public Settings getSettings(Model model)
     {
-        if (loadedSettings.containsKey(modelName))
+        if (loadedSettings.containsKey(model.name()))
         {
-            return loadedSettings.get(modelName);
+            return loadedSettings.get(model.name());
         }
 
-        Settings settings = new Settings(modelName);
+        Settings settings = new Settings(model);
         loadFromDefaults(settings);
         settings.loadFromDisk();
 
-        loadedSettings.put(modelName, settings);
+        loadedSettings.put(model.name(), settings);
 
         return settings;
     }
@@ -74,7 +78,7 @@ public class SettingsManager {
 
     private void loadFromDefaults(Settings settings)
     {
-        String modelName = settings.getModelName();
+        String modelName = settings.getModel().name();
 
         settings.setAllowsAboveHorizon(getValue(modelName, "allowsAboveHorizon", settings.getAllowsAboveHorizon()));
         settings.setPhotosPerRow(getValue(modelName, "photosPerRow", settings.getPhotosPerRow()));

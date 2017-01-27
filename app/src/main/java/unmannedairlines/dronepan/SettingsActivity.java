@@ -6,24 +6,20 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class SettingsActivity extends BaseActivity implements View.OnClickListener {
+import dji.common.product.Model;
+import dji.sdk.base.DJIBaseProduct;
 
-    String modelName;
+public class SettingsActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
-        this.modelName = getIntent().getExtras().getString("modelName");
-        if (this.modelName == null || this.modelName.isEmpty())
-        {
-            this.modelName = "Default";
-        }
-
         ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
 
-        Settings settings = SettingsManager.getInstance().getSettings(modelName);
+        Model connectedModel = DJIConnection.getModelSafely();
+        Settings settings = SettingsManager.getInstance().getSettings(connectedModel);
         binding.setVariable(BR.settings, settings);
 
         Button button = (Button)findViewById(R.id.goBackButton);

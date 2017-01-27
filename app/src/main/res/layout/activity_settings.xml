@@ -34,7 +34,7 @@
                 android:textStyle="bold"/>
 
             <TextView
-                android:text="@{settings.modelName}"
+                android:text="@{settings.modelDisplayName}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"

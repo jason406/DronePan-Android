@@ -20,54 +20,54 @@
 	</dict>
     <key>allowsAboveHorizon</key>
     <dict>
-        <key>DJIAircraftModelNameMavicPro</key>
+        <key>MavicPro</key>
         <false/>
     </dict>
 	<key>photosPerRow</key>
 	<dict>
-		<key>DJIAircraftModelNameMavicPro</key>
+		<key>MavicPro</key>
 		<integer>7</integer>
 	</dict>
 	<key>relativeGimbalYaw</key>
 	<dict>
-		<key>DJIHandheldModelNameOsmo</key>
+		<key>Osmo</key>
 		<false/>
-		<key>DJIHandheldModelNameOsmoMobile</key>
+		<key>Osmo_Mobile</key>
 		<false/>
-		<key>DJIHandheldModelNameOsmoPlus</key>
+		<key>OsmoPlus</key>
 		<false/>
-		<key>DJIHandheldModelNameOsmoPro</key>
+		<key>Osmo_Pro</key>
 		<false/>
-		<key>DJIHandheldModelNameOsmoRAW</key>
+		<key>Osmo_Raw</key>
 		<false/>
-		<key>DJIAircraftModelNamePhantom34K</key>
+		<key>Phantom_3_4K</key>
 		<false/>
-		<key>DJIAircraftModelNamePhantom3Advanced</key>
+		<key>Phantom_3_Advanced</key>
 		<false/>
-		<key>DJIAircraftModelNamePhantom3Standard</key>
+		<key>Phantom_3_Standard</key>
 		<false/>
-		<key>DJIAircraftModelNamePhantom3Professional</key>
+		<key>Phantom_3_Professional</key>
 		<false/>
-		<key>DJIAircraftModelNameA3</key>
+		<key>A3</key>
 		<false/>
 	</dict>
 	<key>switchPosition</key>
 	<dict>
-		<key>DJIAircraftModelNameMavicPro</key>
+		<key>MavicPro</key>
 		<dict>
 			<key>name</key>
 			<string>P</string>
 			<key>position</key>
 			<integer>2</integer>
 		</dict>
-		<key>DJIAircraftModelNamePhantom4</key>
+		<key>Phantom_4</key>
 		<dict>
 			<key>name</key>
 			<string>P</string>
 			<key>position</key>
 			<integer>3</integer>
 		</dict>
-		<key>DJIAircraftModelNamePhantom4Pro</key>
+		<key>Phantom4_Pro</key>
 		<dict>
 			<key>name</key>
 			<string>P</string>

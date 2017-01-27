@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import dji.common.product.Model;
 import dji.sdk.camera.DJICamera;
 import dji.sdk.products.DJIAircraft;
 import dji.sdk.products.DJIHandHeld;
@@ -195,5 +196,23 @@ public class DJIConnection extends Application {
     };
 
     public static Context getContext() { return context; }
+
+    public static Model getModelSafely()
+    {
+        Model model = null;
+
+        DJIBaseProduct product = getProductInstance();
+        if (product != null)
+        {
+            model = product.getModel();
+        }
+
+        if (model == null)
+        {
+            model = Model.UnknownAircraft;
+        }
+
+        return model;
+    }
 
 }
