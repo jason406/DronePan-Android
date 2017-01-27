@@ -834,6 +834,11 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                 resetGimbal();
 
+                // Rest the counters
+                photos_taken_count = 0;
+                missionYawCount = 0;
+                column_counter = 0;
+
             }
 
         };
