@@ -38,39 +38,43 @@
         android:paddingTop="15dp">
 
         <TextView
-            android:text="Photo: -"
+            android:text="Photo: 0/19"
             android:layout_height="wrap_content"
             android:id="@+id/sequenceLabel"
             android:textColor="@android:color/white"
-            android:layout_width="100dp" />
+            android:layout_width="90dp" />
 
         <TextView
-            android:text="Battery: -"
             android:layout_height="wrap_content"
             android:id="@+id/batteryLabel"
             android:textColor="@android:color/white"
-            android:layout_width="80dp" />
+            android:layout_width="80dp"
+            android:layout_marginLeft="15dp"
+            android:text="Batt: -" />
 
         <TextView
-            android:text="Satellites: -"
+            android:text="Sats: -"
             android:layout_height="wrap_content"
             android:id="@+id/satelliteLabel"
             android:textColor="@android:color/white"
-            android:layout_width="90dp" />
+            android:layout_width="90dp"
+            android:layout_marginLeft="15dp"/>
 
         <TextView
-            android:text="Distance: -"
+            android:text="Dist: -"
             android:layout_height="wrap_content"
             android:id="@+id/distanceLabel"
             android:textColor="@android:color/white"
-            android:layout_width="90dp" />
+            android:layout_width="90dp"
+            android:layout_marginLeft="15dp"/>
 
         <TextView
-            android:text="Altitude: -"
+            android:text="Alt: -"
             android:layout_height="wrap_content"
             android:id="@+id/altitudeLabel"
             android:textColor="@android:color/white"
-            android:layout_width="90dp" />
+            android:layout_width="90dp"
+            android:layout_marginLeft="15dp"/>
     </LinearLayout>
 
     <ImageButton

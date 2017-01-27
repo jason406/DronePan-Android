@@ -60,8 +60,10 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     private ImageButton panoButton;
 
     private TextView batteryLabel;
-
     private TextView sequenceLabel;
+    private TextView satelliteLabel;
+    private TextView distanceLabel;
+    private TextView altitudeLabel;
 
     private DJIFlightController flightController;
 
@@ -112,6 +114,11 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         batteryLabel = (TextView)findViewById(R.id.batteryLabel);
         sequenceLabel = (TextView)findViewById(R.id.sequenceLabel);
+        satelliteLabel = (TextView)findViewById(R.id.satelliteLabel);
+        distanceLabel = (TextView)findViewById(R.id.distanceLabel);
+        altitudeLabel = (TextView)findViewById(R.id.altitudeLabel);
+
+
     }
 
     // Putting these callbacks in here because that's what DJI does in their sample code
@@ -132,7 +139,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                             runOnUiThread(new Thread(new Runnable() {
                                 public void run() {
-                                    batteryLabel.setText("Battery: " + batteryState.getBatteryEnergyRemainingPercent() + "%");
+                                    batteryLabel.setText("Batt: " + batteryState.getBatteryEnergyRemainingPercent() + "%");
                                 }
                             }));
 
@@ -160,11 +167,25 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                         @Override
                         public void onResult(DJIFlightControllerCurrentState
                                                      djiFlightControllerCurrentState) {
+
+                            final DJIFlightControllerCurrentState state = djiFlightControllerCurrentState;
+
                             if (compass != null) {
 
                                 aircraftHeading = compass.getHeading();
 
                             }
+
+                            // Update some telemetry labels
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+
+                                    satelliteLabel.setText("Sats: " + state.getSatelliteCount());
+                                    altitudeLabel.setText("Alt: " + state.getAircraftLocation().getAltitude() + "m");
+
+                                }
+                            });
+
                         }
                     });
 
@@ -196,9 +217,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                     } else {
 
-                        showToast("Panorama completed successfully!");
-
-                        resetGimbal();
+                        shootNadir();
 
                     }
 
@@ -777,6 +796,51 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     }
 
+    // Shoot the final nadir shot
+    // Make this configurable to support more than one
+    private void shootNadir() {
+
+        pitchGimbal(-90);
+
+        final Handler h = new Handler();
+
+        final Runnable photoThread = new Runnable() {
+
+            @Override
+            public void run() {
+
+                takePhotoWithDelay(0);
+
+                finishPano();
+
+            }
+
+        };
+
+        h.postDelayed(photoThread, 1500);
+
+    }
+
+    private void finishPano() {
+
+        final Handler h = new Handler();
+
+        final Runnable gimbalThread = new Runnable() {
+
+            @Override
+            public void run() {
+
+                showToast("Pano completed successfully");
+
+                resetGimbal();
+
+            }
+
+        };
+
+        h.postDelayed(gimbalThread, 3000);
+
+    }
 
 
     // Pitch gimbal to specific angle
