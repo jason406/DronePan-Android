@@ -319,23 +319,37 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private void startPano() {
 
-        // We need to reset the gimbal first
-        resetGimbal();
-               
-        
-		// Precalcuate panorama parameters.
-        setupPanoramaShoot();
+        // User has started the pano
+        if (!pano_in_progress) {
 
-        if (!settings.getRelativeGimbalYaw()) {
-            //shootPanoWithGimbalAndCustomMission();
-        }
-        else {
-            //shootPanoWithAircraft();
-        }
+            // We need to reset the gimbal first
+            resetGimbal();
 
-		shootColumn();
-		
-        showToast("Starting panorama");
+            // Precalcuate panorama parameters.
+            setupPanoramaShoot();
+
+            if (!settings.getRelativeGimbalYaw()) {
+                //shootPanoWithGimbalAndCustomMission();
+            }
+            else {
+                //shootPanoWithAircraft();
+            }
+
+            // Set the pano state and change the button icon
+            pano_in_progress = true;
+            panoButton.setImageResource(R.drawable.stop_icon);
+
+            shootColumn();
+
+            showToast("Starting panorama");
+
+        // User has stopped the pano
+        } else {
+
+            pano_in_progress = false;
+            showToast("Stopping panorama. Please wait...");
+
+        }
     }
 
     // Setup our gimbal pitch/yaw angles
@@ -597,7 +611,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private DJIAircraftYawStep yawAircraftStep(float angle) {
 
-        return new DJIAircraftYawStep(angle, 50,
+        return new DJIAircraftYawStep(angle, 40,
 
                 new DJICommonCallbacks.DJICompletionCallback() {
 
@@ -726,6 +740,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     int pitch_angle = pitch_range / photos_per_column;
     int column_counter = 0;
     int photos_taken_count = 0;
+    boolean pano_in_progress = false;
 
     // The goal here is to shoot a column of photos regardless of aircraft or gimbal yaw approach
     // The sequence is pitch, shoot, pitch, shoot, etc
@@ -738,6 +753,14 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
             @Override
             public void run() {
+
+                // Check if the user has stopped the pano
+                if (!pano_in_progress) {
+
+                    cancelPano();
+                    return;
+
+                }
 
                 Log.d(TAG, "Taking photo");
 
@@ -758,6 +781,14 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
             @Override
             public void run() {
+
+                // Check if the user has stopped the pano
+                if (!pano_in_progress) {
+
+                    cancelPano();
+                    return;
+
+                }
 
                 if (column_counter < photos_per_column) {
 
@@ -821,6 +852,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     }
 
+    // Last step of the pano and give the user feedback
     private void finishPano() {
 
         final Handler h = new Handler();
@@ -830,20 +862,49 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             @Override
             public void run() {
 
+                panoButton.setImageResource(R.drawable.start_icon);
                 showToast("Pano completed successfully");
 
                 resetGimbal();
 
-                // Rest the counters
+                // Reset the counters
                 photos_taken_count = 0;
                 missionYawCount = 0;
                 column_counter = 0;
+
+                // So the user can shoot another pano
+                pano_in_progress = false;
 
             }
 
         };
 
         h.postDelayed(gimbalThread, 3000);
+
+    }
+
+    // If a user stops the pano during the process
+    private void cancelPano() {
+
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                panoButton.setImageResource(R.drawable.start_icon);
+                sequenceLabel.setText("Photo: 0/19");
+
+            }
+        });
+
+        // Reset the counters
+        photos_taken_count = 0;
+        missionYawCount = 0;
+        column_counter = 0;
+
+        resetGimbal();
+
+        showToast("Pano stopped successfully");
 
     }
 
