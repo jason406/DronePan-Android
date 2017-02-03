@@ -807,7 +807,12 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             @Override
             public void run() {
 
-                panoButton.setImageResource(R.drawable.start_icon);
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        panoButton.setImageResource(R.drawable.start_icon);
+                    }
+                });
+
                 showToast("Pano completed successfully");
 
                 resetGimbal();
@@ -837,7 +842,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             public void run() {
 
                 panoButton.setImageResource(R.drawable.start_icon);
-                sequenceLabel.setText("Photo: 0/19");
+                sequenceLabel.setText("Photo: -");
 
             }
         });
