@@ -71,6 +71,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private Timer yawAircraftTimer;
 
+    // shootColumn variables
+    int column_counter = 0;
+    int photos_taken_count = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,7 +119,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         super.onAttachedToWindow();
 
         DJIBaseProduct product = DJIConnection.getProductInstance();
-        
+
         // Setup the battery listener
         try {
             product.getBattery().setBatteryStateUpdateCallback(
@@ -200,7 +203,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
 
                     // This will loop 6 times and take 6 shots hopefully
-                    if (missionYawCount < 6) {
+                    if (missionYawCount < settings.getPhotosPerRow()) {
 
                         shootColumn();
 
@@ -284,11 +287,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                                 photos_taken_count++;
 
-                                runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        sequenceLabel.setText("Photo: " + photos_taken_count + "/19");
-                                    }
-                                });
+                                updatePhotoCountUi();
 
                                 Log.d(TAG, "takePhotoWithDelay: success");
 
@@ -310,19 +309,14 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         // We need to reset the gimbal first
         resetGimbal();
-               
-        
+
 		// Precalcuate panorama parameters.
         setupPanoramaShoot();
 
-        if (!settings.getRelativeGimbalYaw()) {
-            //shootPanoWithGimbalAndCustomMission();
-        }
-        else {
-            //shootPanoWithAircraft();
-        }
+        // Inspire
+        //shootPanoWithGimbalAndCustomMission();
 
-		shootColumn();
+        shootColumn();
 		
         showToast("Starting panorama");
     }
@@ -338,6 +332,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     {
         settings = SettingsManager.getInstance().getSettings(DJIConnection.getModelSafely());
 
+        // Setup for old/previous method?
         pitchCount = 0;
         yawCount = 0;
 
@@ -348,9 +343,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         for (int i = 0; i < pitches.length; i++)
         {
             pitches[i] = i * pitchAngle;
-            if (pitches[i] > 180)
+            if (pitches[i] > 90)
             {
-                pitches[i] -= 360;
+                pitches[i] -= 180;
             }
         }
 
@@ -363,6 +358,12 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                 yaws[i] -= 360;
             }
         }
+
+        // Setup for custom mission / shoot column
+        column_counter = 0;
+        photos_taken_count = 0;
+
+        updatePhotoCountUi();
     }
 
     /*
@@ -529,7 +530,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         LinkedList<DJIMissionStep> steps = new LinkedList<DJIMissionStep>();
 
-        steps.add(yawAircraftStep(60));
+        steps.add(yawAircraftStep(settings.getYawAngle()));
         prepareAndStartCustomMission(steps);
 
         // This should work but doesn't - bug in DJI SDK 3.5.
@@ -670,12 +671,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         });
     }
 
-    int pitch_range = -90; // So we pitch the gimbal down
-    int photos_per_column = 3;
-    int pitch_angle = pitch_range / photos_per_column;
-    int column_counter = 0;
-    int photos_taken_count = 0;
-
     // The goal here is to shoot a column of photos regardless of aircraft or gimbal yaw approach
     // The sequence is pitch, shoot, pitch, shoot, etc
     // Let's not shoot the nadir photo here
@@ -708,9 +703,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             @Override
             public void run() {
 
-                if (column_counter < photos_per_column) {
+                if (column_counter < settings.getNumberOfRows()) {
 
-                    float angle = pitch_angle * column_counter;
+                    float angle = settings.getPitchAngle() * column_counter * -1;
 
                     Log.d(TAG, "Pitching gimbal to: " + angle);
 
@@ -730,7 +725,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                     yawAircraftCustomMission();
 
                     Log.d(TAG, "Yawing to new position");
-
                 }
 
 
@@ -851,6 +845,16 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                     }
                 }
             });
+    }
+
+    private void updatePhotoCountUi()
+    {
+        // Update UI.
+        runOnUiThread(new Runnable() {
+            public void run() {
+                sequenceLabel.setText("Photo: " + photos_taken_count + "/" + settings.getNumberOfPhotos());
+            }
+        });
     }
 
     public void showToast(final String msg) {
