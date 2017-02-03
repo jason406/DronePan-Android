@@ -1,11 +1,9 @@
 package unmannedairlines.dronepan;
 
-
 import android.content.Intent;
-import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -16,15 +14,11 @@ import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import dji.common.battery.DJIBatteryState;
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.DJIFlightControllerCurrentState;
-import dji.common.flightcontroller.DJIVirtualStickFlightControlData;
-import dji.common.flightcontroller.DJIVirtualStickVerticalControlMode;
-import dji.common.flightcontroller.DJIVirtualStickYawControlMode;
 import dji.common.gimbal.DJIGimbalAngleRotation;
 import dji.common.gimbal.DJIGimbalRotateAngleMode;
 import dji.common.gimbal.DJIGimbalRotateDirection;
@@ -41,10 +35,8 @@ import dji.sdk.missionmanager.DJICustomMission;
 import dji.sdk.missionmanager.DJIMission;
 import dji.sdk.missionmanager.DJIMissionManager;
 import dji.sdk.missionmanager.missionstep.DJIAircraftYawStep;
-import dji.sdk.missionmanager.missionstep.DJIGimbalAttitudeStep;
 import dji.sdk.missionmanager.missionstep.DJIMissionStep;
 import dji.sdk.missionmanager.missionstep.DJIShootPhotoStep;
-import dji.sdk.products.DJIAircraft;
 
 public class CameraActivity extends BaseActivity implements TextureView.SurfaceTextureListener, View.OnClickListener {
 
@@ -79,7 +71,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private Timer yawAircraftTimer;
 
-    private YawAircraftTask yawAircraftTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,8 +108,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         satelliteLabel = (TextView)findViewById(R.id.satelliteLabel);
         distanceLabel = (TextView)findViewById(R.id.distanceLabel);
         altitudeLabel = (TextView)findViewById(R.id.altitudeLabel);
-
-
     }
 
     // Putting these callbacks in here because that's what DJI does in their sample code
@@ -481,47 +470,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         // This is the entry point for each loop
         h.postDelayed(pitchThread, 1000);
-
-
     }
-
-    /*private void shootPanoWithAircraft() {
-
-        Settings settings = new Settings("Inspire 1");
-
-        settings.getNumberOfRows();
-
-        flightController = DJIConnection.getAircraftInstance().getFlightController();
-
-        // Let's enable virtual stick control mode so we can send commands to the flight controller
-        flightController.enableVirtualStickControlMode(
-                new DJICommonCallbacks.DJICompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (error == null) {
-
-                            // Set vertical control mode to velocity so that when we send a value of 0 it won't descend
-                            flightController.setVerticalControlMode(DJIVirtualStickVerticalControlMode.Velocity);
-
-                            // Let's set the yaw mode to angle - angles are relative to the front of the aircraft
-                            flightController.setYawControlMode(DJIVirtualStickYawControlMode.Angle);
-
-                            if (yawAircraftTimer == null) {
-                                yawAircraftTask = new YawAircraftTask();
-                                yawAircraftTimer = new Timer();
-                                yawAircraftTimer.schedule(yawAircraftTask, 0, 200);
-                            }
-
-                        } else {
-
-                            showToast("Error enabling virtual stick mode");
-
-                        }
-                    }
-                }
-        );
-
-    }*/
 
     private void prepareAndStartCustomMission(LinkedList<DJIMissionStep> steps) {
 
@@ -954,30 +903,5 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         }
 
         return false;
-    }
-
-
-
-    class YawAircraftTask extends TimerTask {
-
-        @Override
-        public void run() {
-
-            Log.d(TAG, "task is running");
-
-            DJIFlightController fc = DJIConnection.getAircraftInstance().getFlightController();
-            if (fc != null) {
-                fc.sendVirtualStickFlightControlData(
-                        new DJIVirtualStickFlightControlData(
-                                0, 0, 60, 0
-                        ), new DJICommonCallbacks.DJICompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
-
-                            }
-                        }
-                );
-            }
-        }
     }
 }
