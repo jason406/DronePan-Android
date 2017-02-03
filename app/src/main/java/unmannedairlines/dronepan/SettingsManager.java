@@ -82,7 +82,9 @@ public class SettingsManager {
         String modelName = settings.getModel().name();
 
         settings.setAllowsAboveHorizon(getValue(modelName, "allowsAboveHorizon", settings.getAllowsAboveHorizon()));
+        settings.setNumberOfRows(getValue(modelName, "numberOfRows", settings.getNumberOfRows()));
         settings.setPhotosPerRow(getValue(modelName, "photosPerRow", settings.getPhotosPerRow()));
+        settings.setNumberOfNadirShots(getValue(modelName, "numberOfNadirShots", settings.getNumberOfNadirShots()));
         settings.setRelativeGimbalYaw(getValue(modelName, "relativeGimbalYaw", settings.getRelativeGimbalYaw()));
         settings.setSwitchPosition(getValue(modelName, "switchPostion", "position", settings.getSwitchPosition()));
         settings.setSwitchName(getValue(modelName, "switchPosition", "name", settings.getSwitchName()));

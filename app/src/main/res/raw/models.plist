@@ -6,8 +6,12 @@
 	<dict>
 		<key>allowsAboveHorizon</key>
 		<true/>
+		<key>numberOfRows</key>
+		<integer>4</integer>
 		<key>photosPerRow</key>
 		<integer>6</integer>
+		<key>numberOfNadirShots</key>
+		<integer>1</integer>
 		<key>relativeGimbalYaw</key>
 		<true/>
 		<key>switchPosition</key>
