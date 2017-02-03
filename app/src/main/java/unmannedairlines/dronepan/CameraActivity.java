@@ -1,11 +1,9 @@
 package unmannedairlines.dronepan;
 
-
 import android.content.Intent;
-import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -16,15 +14,11 @@ import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import dji.common.battery.DJIBatteryState;
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.DJIFlightControllerCurrentState;
-import dji.common.flightcontroller.DJIVirtualStickFlightControlData;
-import dji.common.flightcontroller.DJIVirtualStickVerticalControlMode;
-import dji.common.flightcontroller.DJIVirtualStickYawControlMode;
 import dji.common.gimbal.DJIGimbalAngleRotation;
 import dji.common.gimbal.DJIGimbalRotateAngleMode;
 import dji.common.gimbal.DJIGimbalRotateDirection;
@@ -41,10 +35,8 @@ import dji.sdk.missionmanager.DJICustomMission;
 import dji.sdk.missionmanager.DJIMission;
 import dji.sdk.missionmanager.DJIMissionManager;
 import dji.sdk.missionmanager.missionstep.DJIAircraftYawStep;
-import dji.sdk.missionmanager.missionstep.DJIGimbalAttitudeStep;
 import dji.sdk.missionmanager.missionstep.DJIMissionStep;
 import dji.sdk.missionmanager.missionstep.DJIShootPhotoStep;
-import dji.sdk.products.DJIAircraft;
 
 public class CameraActivity extends BaseActivity implements TextureView.SurfaceTextureListener, View.OnClickListener {
 
@@ -79,7 +71,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
     private Timer yawAircraftTimer;
 
-    private YawAircraftTask yawAircraftTask;
+    // shootColumn variables
+    int column_counter = 0;
+    int photos_taken_count = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,8 +111,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         satelliteLabel = (TextView)findViewById(R.id.satelliteLabel);
         distanceLabel = (TextView)findViewById(R.id.distanceLabel);
         altitudeLabel = (TextView)findViewById(R.id.altitudeLabel);
-
-
     }
 
     // Putting these callbacks in here because that's what DJI does in their sample code
@@ -127,7 +119,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         super.onAttachedToWindow();
 
         DJIBaseProduct product = DJIConnection.getProductInstance();
-        
+
         // Setup the battery listener
         try {
             product.getBattery().setBatteryStateUpdateCallback(
@@ -211,7 +203,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
 
                     // This will loop 6 times and take 6 shots hopefully
-                    if (missionYawCount < 6) {
+                    if (missionYawCount < settings.getPhotosPerRow()) {
 
                         shootColumn();
 
@@ -295,11 +287,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                                 photos_taken_count++;
 
-                                runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        sequenceLabel.setText("Photo: " + photos_taken_count + "/19");
-                                    }
-                                });
+                                updatePhotoCountUi();
 
                                 Log.d(TAG, "takePhotoWithDelay: success");
 
@@ -328,24 +316,21 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             // Precalcuate panorama parameters.
             setupPanoramaShoot();
 
-            if (!settings.getRelativeGimbalYaw()) {
-                //shootPanoWithGimbalAndCustomMission();
-            }
-            else {
-                //shootPanoWithAircraft();
-            }
-
+        	            
             // Set the pano state and change the button icon
             pano_in_progress = true;
             panoButton.setImageResource(R.drawable.stop_icon);
 
-            shootColumn();
+			// Inspire
+            //shootPanoWithGimbalAndCustomMission();
+
+			shootColumn();
 
             showToast("Starting panorama");
 
-        // User has stopped the pano
         } else {
-
+			// User has stopped the pano
+        
             pano_in_progress = false;
             showToast("Stopping panorama. Please wait...");
 
@@ -363,6 +348,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     {
         settings = SettingsManager.getInstance().getSettings(DJIConnection.getModelSafely());
 
+        // Setup for old/previous method?
         pitchCount = 0;
         yawCount = 0;
 
@@ -373,9 +359,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         for (int i = 0; i < pitches.length; i++)
         {
             pitches[i] = i * pitchAngle;
-            if (pitches[i] > 180)
+            if (pitches[i] > 90)
             {
-                pitches[i] -= 360;
+                pitches[i] -= 180;
             }
         }
 
@@ -388,6 +374,12 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                 yaws[i] -= 360;
             }
         }
+
+        // Setup for custom mission / shoot column
+        column_counter = 0;
+        photos_taken_count = 0;
+
+        updatePhotoCountUi();
     }
 
     /*
@@ -495,47 +487,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         // This is the entry point for each loop
         h.postDelayed(pitchThread, 1000);
-
-
     }
-
-    /*private void shootPanoWithAircraft() {
-
-        Settings settings = new Settings("Inspire 1");
-
-        settings.getNumberOfRows();
-
-        flightController = DJIConnection.getAircraftInstance().getFlightController();
-
-        // Let's enable virtual stick control mode so we can send commands to the flight controller
-        flightController.enableVirtualStickControlMode(
-                new DJICommonCallbacks.DJICompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (error == null) {
-
-                            // Set vertical control mode to velocity so that when we send a value of 0 it won't descend
-                            flightController.setVerticalControlMode(DJIVirtualStickVerticalControlMode.Velocity);
-
-                            // Let's set the yaw mode to angle - angles are relative to the front of the aircraft
-                            flightController.setYawControlMode(DJIVirtualStickYawControlMode.Angle);
-
-                            if (yawAircraftTimer == null) {
-                                yawAircraftTask = new YawAircraftTask();
-                                yawAircraftTimer = new Timer();
-                                yawAircraftTimer.schedule(yawAircraftTask, 0, 200);
-                            }
-
-                        } else {
-
-                            showToast("Error enabling virtual stick mode");
-
-                        }
-                    }
-                }
-        );
-
-    }*/
 
     private void prepareAndStartCustomMission(LinkedList<DJIMissionStep> steps) {
 
@@ -594,7 +546,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
         LinkedList<DJIMissionStep> steps = new LinkedList<DJIMissionStep>();
 
-        steps.add(yawAircraftStep(60));
+        steps.add(yawAircraftStep(settings.getYawAngle()));
         prepareAndStartCustomMission(steps);
 
         // This should work but doesn't - bug in DJI SDK 3.5.
@@ -735,13 +687,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         });
     }
 
-    int pitch_range = -90; // So we pitch the gimbal down
-    int photos_per_column = 3;
-    int pitch_angle = pitch_range / photos_per_column;
-    int column_counter = 0;
-    int photos_taken_count = 0;
     boolean pano_in_progress = false;
-
     // The goal here is to shoot a column of photos regardless of aircraft or gimbal yaw approach
     // The sequence is pitch, shoot, pitch, shoot, etc
     // Let's not shoot the nadir photo here
@@ -790,9 +736,9 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
 
                 }
 
-                if (column_counter < photos_per_column) {
+                if (column_counter < settings.getNumberOfRows()) {
 
-                    float angle = pitch_angle * column_counter;
+                    float angle = settings.getPitchAngle() * column_counter * -1;
 
                     Log.d(TAG, "Pitching gimbal to: " + angle);
 
@@ -812,7 +758,6 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
                     yawAircraftCustomMission();
 
                     Log.d(TAG, "Yawing to new position");
-
                 }
 
 
@@ -965,6 +910,16 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
             });
     }
 
+    private void updatePhotoCountUi()
+    {
+        // Update UI.
+        runOnUiThread(new Runnable() {
+            public void run() {
+                sequenceLabel.setText("Photo: " + photos_taken_count + "/" + settings.getNumberOfPhotos());
+            }
+        });
+    }
+
     public void showToast(final String msg) {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -1015,30 +970,5 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         }
 
         return false;
-    }
-
-
-
-    class YawAircraftTask extends TimerTask {
-
-        @Override
-        public void run() {
-
-            Log.d(TAG, "task is running");
-
-            DJIFlightController fc = DJIConnection.getAircraftInstance().getFlightController();
-            if (fc != null) {
-                fc.sendVirtualStickFlightControlData(
-                        new DJIVirtualStickFlightControlData(
-                                0, 0, 60, 0
-                        ), new DJICommonCallbacks.DJICompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
-
-                            }
-                        }
-                );
-            }
-        }
     }
 }

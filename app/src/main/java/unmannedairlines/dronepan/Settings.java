@@ -110,8 +110,13 @@ public class Settings extends BaseObservable {
 
     @Bindable
     public float getPitchAngle() {
-        float maxPitchAngle = this.allowsAboveHorizon ? 180.0f : 90.0f;
-        float pitchAngle = maxPitchAngle / getNumberOfRows();
+        // TODO: adjust max pitch angle based on settings.
+        //float maxPitchAngle = this.allowsAboveHorizon ? 90.0f : 0.0f;
+        float maxPitchAngle = 0.0f;
+        float minPitchAngle = -90.0f;
+
+        float totalPitchAngle = maxPitchAngle - minPitchAngle;
+        float pitchAngle = totalPitchAngle / getNumberOfRows();
         return pitchAngle;
     }
 

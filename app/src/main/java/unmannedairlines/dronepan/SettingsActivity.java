@@ -5,6 +5,7 @@ import android.databinding.ViewDataBinding;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import dji.common.product.Model;
 import dji.sdk.base.DJIBaseProduct;
@@ -24,6 +25,12 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
 
         Button button = (Button)findViewById(R.id.goBackButton);
         button.setOnClickListener(this);
+
+        TextView versionTextView = (TextView)findViewById(R.id.versionTextView);
+        versionTextView.setText("DronePan Version " + DronePanApplication.getBuildVersion());
+
+        TextView sdkVersionTextView = (TextView)findViewById(R.id.sdkVersionTextView);
+        sdkVersionTextView.setText("SDK Version " + DJIConnection.getSdkVersion());
     }
 
     @Override
