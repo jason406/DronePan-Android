@@ -38,7 +38,7 @@
         android:paddingTop="15dp">
 
         <TextView
-            android:text="Photo: 0/19"
+            android:text="Photo: -"
             android:layout_height="wrap_content"
             android:id="@+id/sequenceLabel"
             android:textColor="@android:color/white"
