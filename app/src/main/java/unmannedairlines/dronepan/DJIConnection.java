@@ -43,6 +43,7 @@ public class DJIConnection extends Application {
         if (null == mProduct) {
             mProduct = DJISDKManager.getInstance().getDJIProduct();
         }
+
         return mProduct;
     }
 
@@ -91,6 +92,11 @@ public class DJIConnection extends Application {
     public static boolean isCompassAvailable() {
         return isFlightControllerAvailable() && isAircraft() &&
                 (null != DJIConnection.getAircraftInstance().getFlightController().getCompass());
+    }
+
+    public static String getSdkVersion()
+    {
+        return DJISDKManager.getInstance().getSDKVersion();
     }
 
     @Override
