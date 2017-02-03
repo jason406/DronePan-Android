@@ -67,7 +67,7 @@
         <!-- DJI SDK -->
         <activity
             android:name=".ConnectionActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -76,10 +76,10 @@
         </activity>
         <activity
             android:name=".CameraActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="sensorLandscape" />
         <activity
             android:name=".SettingsActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="sensorLandscape" />
     </application>
 
 </manifest>
