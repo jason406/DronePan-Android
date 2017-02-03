@@ -14,7 +14,8 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context="unmannedairlines.dronepan.SettingsActivity">
+        tools:context="unmannedairlines.dronepan.SettingsActivity"
+        android:keepScreenOn="true">
 
         <LinearLayout
             android:id="@+id/headerLayout"
