@@ -1,6 +1,7 @@
 package unmannedairlines.dronepan;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.dd.plist.NSDictionary;
@@ -118,6 +119,7 @@ public class SettingsManager {
         return defaultValue;
     }
 
+    @Nullable
     private Object getValue(NSObject nsObject)
     {
         if (nsObject.getClass().equals(NSNumber.class))
