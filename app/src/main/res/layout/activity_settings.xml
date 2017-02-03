@@ -154,7 +154,7 @@
                     android:max="10"
                     android:progress="@{settings.numberOfRows}"
                     android:id="@+id/numberOfRowsSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:onProgressChanged="@{settings::valueChanged}"
                     android:layout_marginBottom="8dp"/>
 
                 <!-- Number of photos per row -->
@@ -184,7 +184,7 @@
                     android:max="20"
                     android:progress="@{settings.photosPerRow}"
                     android:id="@+id/picturesPerRowSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:onProgressChanged="@{settings::valueChanged}"
                     android:layout_marginBottom="8dp"/>
 
                 <!-- Number of nadir shots  -->
@@ -214,7 +214,7 @@
                     android:max="20"
                     android:progress="@{settings.numberOfNadirShots}"
                     android:id="@+id/numberOfNadirShotsSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:onProgressChanged="@{settings::valueChanged}"
                     android:layout_marginBottom="8dp"/>
 
                 <!-- Delay between photos -->
@@ -244,7 +244,7 @@
                     android:max="150"
                     android:progress="@{(int)(settings.delayBeforeEachShot * 10)}"
                     android:id="@+id/delayBeforeEachShotSeekBar"
-                    android:onProgressChanged="@{settings.valueChanged}"
+                    android:onProgressChanged="@{settings::valueChanged}"
                     android:layout_marginBottom="8dp"/>
 
                 <RelativeLayout
@@ -285,7 +285,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/imperialMetricSwitch"
                         android:checked="@{settings.useImperial}"
-                        android:onCheckedChanged="@{settings.checkedChanged}"
+                        android:onCheckedChanged="@{settings::checkedChanged}"
                         android:layout_alignParentRight="true"/>
                 </RelativeLayout>
 
@@ -327,7 +327,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/aebSwitch"
                         android:checked="@{settings.aebPhotoMode}"
-                        android:onCheckedChanged="@{settings.checkedChanged}"
+                        android:onCheckedChanged="@{settings::checkedChanged}"
                         android:layout_alignParentRight="true"/>
                 </RelativeLayout>
 
@@ -342,14 +342,14 @@
                         android:layout_height="wrap_content"
                         android:text="Save"
                         android:id="@+id/saveSettingsButton"
-                        android:onClick="@{settings.onClicked}"/>
+                        android:onClick="@{settings::onClicked}"/>
 
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Revert to defaults"
                         android:id="@+id/cancelSettingsButton"
-                        android:onClick="@{settings.onClicked}"/>
+                        android:onClick="@{settings::onClicked}"/>
 
                 </LinearLayout>
 
