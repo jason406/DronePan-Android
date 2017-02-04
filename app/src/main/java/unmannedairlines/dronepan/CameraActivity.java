@@ -47,8 +47,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
     protected DJICodecManager mCodecManager = null;
     protected TextureView mVideoSurface = null;
 
-    private Button mSettingsBtn;
-
+    private ImageButton mSettingsBtn;
     private ImageButton panoButton;
 
     private TextView batteryLabel;
@@ -103,7 +102,7 @@ public class CameraActivity extends BaseActivity implements TextureView.SurfaceT
         panoButton = (ImageButton) findViewById(R.id.panoButton);
         panoButton.setOnClickListener(this);
 
-        mSettingsBtn = (Button) findViewById(R.id.btn_settings);
+        mSettingsBtn = (ImageButton) findViewById(R.id.btn_settings);
         mSettingsBtn.setOnClickListener(this);
 
         batteryLabel = (TextView)findViewById(R.id.batteryLabel);
