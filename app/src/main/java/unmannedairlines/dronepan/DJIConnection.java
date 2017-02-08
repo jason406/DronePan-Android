@@ -138,7 +138,7 @@ public class DJIConnection extends Application {
 
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Register sdk fails, check network is available", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "SDK registration failed. Please check your network connection.", Toast.LENGTH_LONG).show();
                     }
                 });
 
