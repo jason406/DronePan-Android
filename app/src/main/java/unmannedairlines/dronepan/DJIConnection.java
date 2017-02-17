@@ -1,12 +1,14 @@
 package unmannedairlines.dronepan;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import dji.common.product.Model;
 import dji.sdk.camera.DJICamera;
 import dji.sdk.products.DJIAircraft;
 import dji.sdk.products.DJIHandHeld;
@@ -27,6 +29,8 @@ public class DJIConnection extends Application {
 
     public static final String FLAG_CONNECTION_CHANGE = "dji_connection_change";
 
+    private static Context context;
+
     private static DJIBaseProduct mProduct;
 
     private Handler mHandler;
@@ -39,6 +43,7 @@ public class DJIConnection extends Application {
         if (null == mProduct) {
             mProduct = DJISDKManager.getInstance().getDJIProduct();
         }
+
         return mProduct;
     }
 
@@ -66,12 +71,42 @@ public class DJIConnection extends Application {
         return camera;
     }
 
+    public static boolean isAircraft() {
+        return DJIConnection.getProductInstance() instanceof DJIAircraft;
+    }
+
+    public static boolean isProductModuleAvailable() {
+        return (null != DJIConnection.getProductInstance());
+    }
+
+    public static synchronized DJIAircraft getAircraftInstance() {
+        if (!isAircraftConnected()) return null;
+        return (DJIAircraft) getProductInstance();
+    }
+
+    public static boolean isFlightControllerAvailable() {
+        return isProductModuleAvailable() && isAircraft() &&
+                (null != DJIConnection.getAircraftInstance().getFlightController());
+    }
+
+    public static boolean isCompassAvailable() {
+        return isFlightControllerAvailable() && isAircraft() &&
+                (null != DJIConnection.getAircraftInstance().getFlightController().getCompass());
+    }
+
+    public static String getSdkVersion()
+    {
+        return DJISDKManager.getInstance().getSDKVersion();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         mHandler = new Handler(Looper.getMainLooper());
         //This is used to start SDK services and initiate SDK.
         DJISDKManager.getInstance().initSDKManager(this, mDJISDKManagerCallback);
+
+        context = getApplicationContext(); // Grab the Context you want.
     }
 
     /**
@@ -103,7 +138,7 @@ public class DJIConnection extends Application {
 
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Register sdk fails, check network is available", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "SDK registration failed. Please check your network connection.", Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -165,5 +200,25 @@ public class DJIConnection extends Application {
             sendBroadcast(intent);
         }
     };
+
+    public static Context getContext() { return context; }
+
+    public static Model getModelSafely()
+    {
+        Model model = null;
+
+        DJIBaseProduct product = getProductInstance();
+        if (product != null)
+        {
+            model = product.getModel();
+        }
+
+        if (model == null)
+        {
+            model = Model.UnknownAircraft;
+        }
+
+        return model;
+    }
 
 }
