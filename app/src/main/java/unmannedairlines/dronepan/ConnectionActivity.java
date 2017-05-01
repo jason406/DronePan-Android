@@ -61,6 +61,13 @@ public class ConnectionActivity extends BaseActivity {
         if (DronePanApplication.isRunningOnEmulator()) {
             launchCameraActivity();
         }
+
+        // Show version info.
+        TextView versionTextView = (TextView)findViewById(R.id.versionTextView);
+        versionTextView.setText("DronePan Version " + DronePanApplication.getBuildVersion());
+
+        TextView sdkVersionTextView = (TextView)findViewById(R.id.sdkVersionTextView);
+        sdkVersionTextView.setText("SDK Version " + DJIConnection.getInstance().getSdkVersion());
     }
 
     @Override
