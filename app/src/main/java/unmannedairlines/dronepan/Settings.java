@@ -35,6 +35,7 @@ public class Settings extends BaseObservable {
     private boolean relativeGimbalYaw;
     private boolean useImperial;
     private boolean aebPhotoMode;
+    private boolean shootRowByRow;
     private String switchName;
     private int switchPosition;
 
@@ -95,6 +96,11 @@ public class Settings extends BaseObservable {
     @Bindable
     public boolean getAebPhotoMode() {
         return aebPhotoMode;
+    }
+
+    @Bindable
+    public boolean getShootRowByRow() {
+        return shootRowByRow;
     }
 
     @Bindable
@@ -172,6 +178,11 @@ public class Settings extends BaseObservable {
         notifyPropertyChanged(BR.aebPhotoMode);
     }
 
+    public void setShootRowByRow(boolean shootRowByRow) {
+        this.shootRowByRow = shootRowByRow;
+        notifyPropertyChanged(BR.shootRowByRow);
+    }
+
     public void setUseImperial(boolean useImperial) {
         this.useImperial = useImperial;
         notifyPropertyChanged(BR.useImperial);
@@ -224,6 +235,10 @@ public class Settings extends BaseObservable {
             case R.id.aebSwitch:
                 setAebPhotoMode(isChecked);
                 break;
+
+            //case R.id.aebSwitch:
+            //    setShootRowByRow(isChecked);
+            //    break;
         }
     }
 
@@ -259,6 +274,7 @@ public class Settings extends BaseObservable {
             setAllowsAboveHorizon(json.getBoolean("allowsAboveHorizon"));
             setUseImperial(json.getBoolean("useImperial"));
             setAebPhotoMode(json.getBoolean("aebPhotoMode"));
+            setShootRowByRow(json.getBoolean("shootRowByRow"));
         }
         catch (JSONException e)
         {
@@ -278,6 +294,7 @@ public class Settings extends BaseObservable {
             json.put("allowsAboveHorizon", allowsAboveHorizon);
             json.put("useImperial", useImperial);
             json.put("aebPhotoMode", aebPhotoMode);
+            json.put("shootRowByRow", shootRowByRow);
 
             saveJson(json.toString());
         }
@@ -363,5 +380,6 @@ public class Settings extends BaseObservable {
         switchPosition = 3;
         useImperial = false;
         aebPhotoMode = false;
+        shootRowByRow = true;
     }
 }

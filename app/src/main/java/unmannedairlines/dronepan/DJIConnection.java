@@ -1,6 +1,5 @@
 package unmannedairlines.dronepan;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -8,206 +7,125 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import dji.common.product.Model;
-import dji.sdk.camera.DJICamera;
-import dji.sdk.products.DJIAircraft;
-import dji.sdk.products.DJIHandHeld;
-import dji.sdk.sdkmanager.DJISDKManager;
-import dji.sdk.base.DJIBaseComponent;
-import dji.sdk.base.DJIBaseComponent.DJIComponentListener;
-import dji.sdk.base.DJIBaseProduct;
-import dji.sdk.base.DJIBaseProduct.DJIBaseProductListener;
-import dji.sdk.base.DJIBaseProduct.DJIComponentKey;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
+import dji.common.product.Model;
+import dji.sdk.base.BaseComponent;
+import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.Camera;
+import dji.sdk.products.Aircraft;
+import dji.sdk.products.HandHeld;
+import dji.sdk.sdkmanager.DJISDKManager;
 
-/**
- * Created by db on 12/27/16.
- */
+public class DJIConnection {
+    private static final String TAG = DJIConnection.class.getName();
+    public static final String FLAG_CONNECTION_CHANGE = "dji_sdk_connection_change";
 
-public class DJIConnection extends Application {
-
-    public static final String FLAG_CONNECTION_CHANGE = "dji_connection_change";
-
-    private static Context context;
-
-    private static DJIBaseProduct mProduct;
-
-    private Handler mHandler;
-
-    /**
-     * This function is used to get the instance of DJIBaseProduct.
-     * If no product is connected, it returns null.
-     */
-    public static synchronized DJIBaseProduct getProductInstance() {
-        if (null == mProduct) {
-            mProduct = DJISDKManager.getInstance().getDJIProduct();
+    private static DJIConnection instance;
+    public static DJIConnection getInstance() {
+        if (instance == null) {
+            instance = new DJIConnection();
         }
 
-        return mProduct;
+        return instance;
     }
 
-    public static boolean isAircraftConnected() {
-        return getProductInstance() != null && getProductInstance() instanceof DJIAircraft;
+    private BaseProduct connectedProduct;
+    private Context context;
+    private Handler handler;
+
+    public DJIConnection() {
+
     }
 
-    public static boolean isHandHeldConnected() {
-        return getProductInstance() != null && getProductInstance() instanceof DJIHandHeld;
+    public void initialize(Context context) {
+        this.context = context;
+
+        // Initialize DJI SDK Manager
+        this.handler = new Handler(Looper.getMainLooper());
+        DJISDKManager.getInstance().registerApp(this.context, mDJISDKManagerCallback);
     }
 
-    public static synchronized DJICamera getCameraInstance() {
-
-        if (getProductInstance() == null) return null;
-
-        DJICamera camera = null;
-
-        if (getProductInstance() instanceof DJIAircraft){
-            camera = ((DJIAircraft) getProductInstance()).getCamera();
-
-        } else if (getProductInstance() instanceof DJIHandHeld) {
-            camera = ((DJIHandHeld) getProductInstance()).getCamera();
-        }
-
-        return camera;
-    }
-
-    public static boolean isAircraft() {
-        return DJIConnection.getProductInstance() instanceof DJIAircraft;
-    }
-
-    public static boolean isProductModuleAvailable() {
-        return (null != DJIConnection.getProductInstance());
-    }
-
-    public static synchronized DJIAircraft getAircraftInstance() {
-        if (!isAircraftConnected()) return null;
-        return (DJIAircraft) getProductInstance();
-    }
-
-    public static boolean isFlightControllerAvailable() {
-        return isProductModuleAvailable() && isAircraft() &&
-                (null != DJIConnection.getAircraftInstance().getFlightController());
-    }
-
-    public static boolean isCompassAvailable() {
-        return isFlightControllerAvailable() && isAircraft() &&
-                (null != DJIConnection.getAircraftInstance().getFlightController().getCompass());
-    }
-
-    public static String getSdkVersion()
-    {
-        return DJISDKManager.getInstance().getSDKVersion();
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mHandler = new Handler(Looper.getMainLooper());
-        //This is used to start SDK services and initiate SDK.
-        DJISDKManager.getInstance().initSDKManager(this, mDJISDKManagerCallback);
-
-        context = getApplicationContext(); // Grab the Context you want.
-    }
-
-    /**
-     * When starting SDK services, an instance of interface DJISDKManager.DJISDKManagerCallback will be used to listen to
-     * the SDK Registration result and the product changing.
-     */
-    private DJISDKManager.DJISDKManagerCallback mDJISDKManagerCallback = new DJISDKManager.DJISDKManagerCallback() {
-
-        //Listens to the SDK registration result
+    private DJISDKManager.SDKManagerCallback mDJISDKManagerCallback = new DJISDKManager.SDKManagerCallback() {
         @Override
-        public void onGetRegisteredResult(DJIError error) {
-
+        public void onRegister(DJIError error) {
+            Log.d(TAG, error == null ? "success" : error.getDescription());
             if(error == DJISDKError.REGISTRATION_SUCCESS) {
-
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), "Register Success", Toast.LENGTH_LONG).show();
-                    }
-                });
-
                 DJISDKManager.getInstance().startConnectionToProduct();
-
-            } else {
-
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
-
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Register sdk fails, check network is available", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "Register Success", Toast.LENGTH_LONG).show();
                     }
                 });
-
+            } else {
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "register sdk failed, check if network is available", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
+
             Log.e("TAG", error.toString());
         }
-
-        //Listens to the connected product changing, including two parts, component changing or product connection changing.
         @Override
-        public void onProductChanged(DJIBaseProduct oldProduct, DJIBaseProduct newProduct) {
-
-            mProduct = newProduct;
-            if(mProduct != null) {
-                mProduct.setDJIBaseProductListener(mDJIBaseProductListener);
+        public void onProductChange(BaseProduct oldProduct, BaseProduct newProduct) {
+            connectedProduct = newProduct;
+            if(connectedProduct != null) {
+                connectedProduct.setBaseProductListener(mDJIBaseProductListener);
             }
 
             notifyStatusChange();
         }
     };
 
-    private DJIBaseProductListener mDJIBaseProductListener = new DJIBaseProductListener() {
-
+    private BaseProduct.BaseProductListener mDJIBaseProductListener = new BaseProduct.BaseProductListener() {
         @Override
-        public void onComponentChange(DJIComponentKey key, DJIBaseComponent oldComponent, DJIBaseComponent newComponent) {
-
+        public void onComponentChange(BaseProduct.ComponentKey key, BaseComponent oldComponent, BaseComponent newComponent) {
             if(newComponent != null) {
-                newComponent.setDJIComponentListener(mDJIComponentListener);
+                newComponent.setComponentListener(mDJIComponentListener);
             }
             notifyStatusChange();
         }
 
         @Override
-        public void onProductConnectivityChanged(boolean isConnected) {
-
+        public void onConnectivityChange(boolean isConnected) {
             notifyStatusChange();
         }
-
     };
 
-    private DJIComponentListener mDJIComponentListener = new DJIComponentListener() {
-
+    private BaseComponent.ComponentListener mDJIComponentListener = new BaseComponent.ComponentListener() {
         @Override
-        public void onComponentConnectivityChanged(boolean isConnected) {
+        public void onConnectivityChange(boolean isConnected) {
             notifyStatusChange();
         }
-
     };
 
     private void notifyStatusChange() {
-        mHandler.removeCallbacks(updateRunnable);
-        mHandler.postDelayed(updateRunnable, 500);
+        handler.removeCallbacks(updateRunnable);
+        handler.postDelayed(updateRunnable, 500);
     }
 
     private Runnable updateRunnable = new Runnable() {
-
         @Override
         public void run() {
             Intent intent = new Intent(FLAG_CONNECTION_CHANGE);
-            sendBroadcast(intent);
+            context.sendBroadcast(intent);
         }
     };
 
-    public static Context getContext() { return context; }
+    public BaseProduct getProduct() {
+        return this.connectedProduct;
+    }
 
-    public static Model getModelSafely()
+    public Model getModelSafely()
     {
         Model model = null;
 
-        DJIBaseProduct product = getProductInstance();
+        BaseProduct product = getProduct();
         if (product != null)
         {
             model = product.getModel();
@@ -215,10 +133,38 @@ public class DJIConnection extends Application {
 
         if (model == null)
         {
-            model = Model.UnknownAircraft;
+            model = Model.UNKNOWN_AIRCRAFT;
         }
 
         return model;
     }
 
+    public boolean isAircraftConnected() {
+        return connectedProduct != null && connectedProduct instanceof Aircraft;
+    }
+
+    public boolean isHandHeldConnected() {
+        return connectedProduct != null && connectedProduct instanceof HandHeld;
+    }
+
+    public synchronized Camera getCamera() {
+
+        if (connectedProduct == null) return null;
+
+        Camera camera = null;
+
+        if (isAircraftConnected()){
+            camera = ((Aircraft)connectedProduct).getCamera();
+
+        } else if (isHandHeldConnected()) {
+            camera = ((HandHeld)connectedProduct).getCamera();
+        }
+
+        return camera;
+    }
+
+    public String getSdkVersion()
+    {
+        return DJISDKManager.getInstance().getSDKVersion();
+    }
 }

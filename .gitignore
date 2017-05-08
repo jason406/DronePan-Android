@@ -54,3 +54,6 @@ gen-external-apklibs
 # End of https://www.gitignore.io/api/android
 
 dJISDKLIB/
+android-uilib-release/android-uilib-release.aar
+android-uilib-release/build.gradle
+import-summary.txt
