@@ -1,18 +1,11 @@
 package unmannedairlines.dronepan;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-
-import dji.common.camera.SystemState;
 import dji.common.error.DJIError;
 import dji.common.gimbal.Attitude;
 import dji.common.gimbal.Rotation;
-import dji.sdk.camera.Camera;
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineEvent;
@@ -20,20 +13,15 @@ import dji.sdk.mission.timeline.actions.AircraftYawAction;
 import dji.sdk.mission.timeline.actions.GimbalAttitudeAction;
 import dji.sdk.mission.timeline.actions.ShootPhotoAction;
 
-public class PanoramaShoot implements MissionControl.Listener, SystemState.Callback {
+public class PanoramaShoot implements MissionControl.Listener {
 
     private static final String TAG = PanoramaShoot.class.getName();
 
-    private Camera camera;
     private MissionControl missionControl;
     private Settings settings;
 
     private int numberOfPhotosTaken;
     private int totalNumberOfPhotos;
-
-    private boolean inProgress;
-    private Queue<TimelineElement> elements;
-    private boolean isCameraReady;
 
     public interface Listener {
         void onPanoramaShootUpdate();
@@ -42,16 +30,11 @@ public class PanoramaShoot implements MissionControl.Listener, SystemState.Callb
     private Listener listener;
 
     public PanoramaShoot() {
-        this.elements = new LinkedList<TimelineElement>();
-
-        this.camera = DJIConnection.getInstance().getCamera();
-        this.camera.setSystemStateCallback(this);
-
         this.missionControl = MissionControl.getInstance();
         this.missionControl.addListener(this);
     }
 
-    public void setListener(Listener listener){
+    public void setListener(Listener listener) {
         this.listener = listener;
         this.notifyListener();
     }
@@ -125,29 +108,24 @@ public class PanoramaShoot implements MissionControl.Listener, SystemState.Callb
         }
     }
 
-    private void setupNadirShots()
-    {
+    private void setupNadirShots() {
         int numberOfNadirShots = settings.getNumberOfNadirShots();
         boolean useGimbalYaw = settings.getRelativeGimbalYaw();
 
-        if (numberOfNadirShots == 0)
-        {
+        if (numberOfNadirShots == 0) {
             return;
         }
 
         float nadirAngle = 360.0f / numberOfNadirShots;
 
-        this.addGimbalPitchAction(90);
+        this.addGimbalPitchAction(-90.0f);
         this.addPhotoShootAction();
 
-        for (int i = 1; i < numberOfNadirShots; i++)
-        {
-            if (useGimbalYaw)
-            {
+        for (int i = 1; i < numberOfNadirShots; i++) {
+            if (useGimbalYaw) {
                 this.addGimbalYawAction(nadirAngle * i);
             }
-            else
-            {
+            else {
                 this.addAircraftYawAction(nadirAngle);
             }
 
@@ -157,26 +135,28 @@ public class PanoramaShoot implements MissionControl.Listener, SystemState.Callb
 
     private void addAircraftYawAction(float relativeYaw) {
         AircraftYawAction aircraftYawAction = new AircraftYawAction(relativeYaw, 40);
-        this.elements.add(aircraftYawAction);
+        this.missionControl.scheduleElement(aircraftYawAction);
     }
 
     private void addGimbalYawAction(float absoluteYaw) {
         Attitude attitude = new Attitude(Rotation.NO_ROTATION, Rotation.NO_ROTATION, absoluteYaw);
         GimbalAttitudeAction gimbalAttitudeAction = new GimbalAttitudeAction(attitude);
-        this.elements.add(gimbalAttitudeAction);
+        this.missionControl.scheduleElement(gimbalAttitudeAction);
     }
 
     private void addGimbalPitchAction(float pitch) {
         Attitude attitude = new Attitude(pitch, Rotation.NO_ROTATION, Rotation.NO_ROTATION);
         GimbalAttitudeAction gimbalAttitudeAction = new GimbalAttitudeAction(attitude);
-        this.elements.add(gimbalAttitudeAction);
+        this.missionControl.scheduleElement(gimbalAttitudeAction);
     }
 
     private void addPhotoShootAction() {
-        //int delayBeforeEachShot = 2;//(int)Math.round(settings.getDelayBeforeEachShot());
-        ShootPhotoAction photoAction = new ShootPhotoAction();//, delayBeforeEachShot);
-        //missionControl.scheduleElement(photoAction);
-        this.elements.add(photoAction);
+        WaitForCameraReadyAction waitForCameraReadyAction = new WaitForCameraReadyAction();
+        this.missionControl.scheduleElement(waitForCameraReadyAction);
+
+        ShootPhotoAction photoAction = new ShootPhotoAction();
+        this.missionControl.scheduleElement(photoAction);
+
         this.totalNumberOfPhotos++;
     }
 
@@ -185,47 +165,14 @@ public class PanoramaShoot implements MissionControl.Listener, SystemState.Callb
     }
 
     public void start() {
-        this.continueWork();
-    }
-
-    public void stop() {
-        if (this.missionControl.isTimelineRunning())
-        {
-            this.missionControl.stopTimeline();
-        }
-    }
-
-    private void continueWork() {
-        if (!this.inProgress) {
-            return;
-        }
-
-        if (isPhotoShootNext()) {
-            this.tryShootPhoto();
-
-            return;
-        }
-
-        this.missionControl.unscheduleEverything();
-        while (!isPhotoShootNext())
-        {
-            this.missionControl.scheduleElement(this.elements.remove());
-        }
-
         this.missionControl.startTimeline();
     }
 
-    private boolean isPhotoShootNext()
-    {
-        TimelineElement element = this.elements.peek();
-        return (element instanceof ShootPhotoAction);
-    }
-
-    private void tryShootPhoto() {
-        if (!this.isCameraReady) {
+    public void stop() {
+        if (this.missionControl.isTimelineRunning()) {
+            this.missionControl.stopTimeline();
         }
     }
-
 
     @Override
     public void onEvent(@Nullable TimelineElement element, TimelineEvent event, @Nullable DJIError error) {
@@ -233,21 +180,22 @@ public class PanoramaShoot implements MissionControl.Listener, SystemState.Callb
             Log.e(TAG, error.toString());
         }
 
-        if (event == TimelineEvent.FINISHED) {
-            this.continueWork();
+        if (event == TimelineEvent.STARTED ||
+            event == TimelineEvent.FINISHED ||
+            event == TimelineEvent.STOPPED ||
+            event == TimelineEvent.STOP_ERROR) {
+            this.notifyListener();
         }
 
         if (element instanceof ShootPhotoAction && event == TimelineEvent.ELEMENT_FINISHED) {
             this.numberOfPhotosTaken++;
             Log.e(TAG, "Picture taken: " + this.numberOfPhotosTaken);
-            notifyListener();
+            this.notifyListener();
         }
     }
 
-    private void notifyListener()
-    {
-        if (this.listener != null)
-        {
+    private void notifyListener() {
+        if (this.listener != null) {
             this.listener.onPanoramaShootUpdate();
         }
     }

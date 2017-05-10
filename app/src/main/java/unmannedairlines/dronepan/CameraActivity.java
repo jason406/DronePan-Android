@@ -158,7 +158,7 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
     }
 
     @Override
-    public void onPanorameShootUpdate() {
+    public void onPanoramaShootUpdate() {
         this.updatePhotoCountUi();
 
         if (isPanoramaShootRunning != this.panoramaShoot.isMissionRunning())

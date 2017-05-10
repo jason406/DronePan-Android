@@ -10,20 +10,20 @@ import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineElementFeedback;
 
 
-public class WaitForCameraReadyTask extends TimelineElement implements SystemState.Callback {
+public class WaitForCameraReadyAction extends TimelineElement implements SystemState.Callback {
 
     Camera camera;
     TimelineElementFeedback feedback;
 
-    public WaitForCameraReadyTask() {
-        DJIConnection.getInstance().getCamera();
+    public WaitForCameraReadyAction() {
+        this.camera = DJIConnection.getInstance().getCamera();
         this.feedback = MissionControl.getInstance();
     }
 
     @Override
     public void run() {
-        this.camera.setSystemStateCallback(this);
         this.feedback.onStart(this);
+        this.camera.setSystemStateCallback(this);
     }
 
     @Override
