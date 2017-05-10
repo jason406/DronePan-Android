@@ -17,14 +17,13 @@ public class ConnectionActivity extends BaseActivity {
     private static final String TAG = ConnectionActivity.class.getName();
 
     private TextView mTextConnectionStatus;
+    private boolean mCameraLaunched;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
             updateUI();
-
         }
     };
 
@@ -61,10 +60,18 @@ public class ConnectionActivity extends BaseActivity {
 
         // Show version info.
         TextView versionTextView = (TextView)findViewById(R.id.versionTextView);
-        versionTextView.setText("DronePan Version " + DronePanApplication.getBuildVersion());
+        versionTextView.setText("DronePan Version: " + DronePanApplication.getBuildVersion());
 
         TextView sdkVersionTextView = (TextView)findViewById(R.id.sdkVersionTextView);
-        sdkVersionTextView.setText("SDK Version " + DJIConnection.getInstance().getSdkVersion());
+        sdkVersionTextView.setText("SDK Version: " + DJIConnection.getInstance().getSdkVersion());
+
+        mCameraLaunched = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mCameraLaunched = false;
     }
 
     @Override
@@ -77,21 +84,27 @@ public class ConnectionActivity extends BaseActivity {
         BaseProduct mProduct = DJIConnection.getInstance().getProduct();
         if (null != mProduct && mProduct.isConnected()) {
             if (null != mProduct.getModel()) {
-                mTextConnectionStatus.setText(mProduct.getModel().getDisplayName() + " connected");
+                mTextConnectionStatus.setText(mProduct.getModel().getDisplayName() + " connected ...");
             }
             else {
-                mTextConnectionStatus.setText("Model unavailable");
+                mTextConnectionStatus.setText("Model unavailable.");
             }
 
             // Let's take them to the camera view
-            launchCameraActivity();
+            this.launchCameraActivity();
         }
         else {
-            mTextConnectionStatus.setText("No product connected");
+            mTextConnectionStatus.setText("No product connected.");
         }
     }
 
     private void launchCameraActivity() {
+        if (mCameraLaunched)
+        {
+            return;
+        }
+
+        mCameraLaunched = true;
 
         final Handler h = new Handler();
 
