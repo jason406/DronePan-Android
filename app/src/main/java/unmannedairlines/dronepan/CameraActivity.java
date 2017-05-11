@@ -128,10 +128,7 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
             Log.i(TAG, "Panorama shoot stopped.");
         }
         else {
-            // check for SD card
-
-            //
-            Log.e(TAG, "startPanorama");
+            Log.e(TAG, "Setting up panorama shoot ...");
             this.panoramaShoot.setup(SettingsManager.getInstance().getSettings(DJIConnection.getInstance().getModelSafely()));
             this.panoramaShoot.start();
             Log.i(TAG, "Panorama shoot started.");

@@ -26,10 +26,10 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
         button.setOnClickListener(this);
 
         TextView versionTextView = (TextView)findViewById(R.id.versionTextView);
-        versionTextView.setText("DronePan Version " + DronePanApplication.getBuildVersion());
+        versionTextView.setText("DronePan Version: " + DronePanApplication.getBuildVersion());
 
         TextView sdkVersionTextView = (TextView)findViewById(R.id.sdkVersionTextView);
-        sdkVersionTextView.setText("SDK Version " + DJIConnection.getInstance().getSdkVersion());
+        sdkVersionTextView.setText("SDK Version: " + DJIConnection.getInstance().getSdkVersion());
     }
 
     @Override

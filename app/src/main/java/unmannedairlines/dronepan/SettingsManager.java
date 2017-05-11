@@ -93,16 +93,13 @@ public class SettingsManager {
     private <T> T getValue(String model, String propertyName, T fallbackValue)
     {
         T value = fallbackValue;
-        if (this.defaults.containsKey(propertyName))
-        {
+        if (this.defaults.containsKey(propertyName)) {
             value = (T)getValue(defaults.get(propertyName));
         }
 
-        if (this.modelOverrides.containsKey(propertyName))
-        {
+        if (this.modelOverrides.containsKey(propertyName)) {
             NSDictionary propOverride = (NSDictionary)this.modelOverrides.get(propertyName);
-            if (propOverride.containsKey(model))
-            {
+            if (propOverride.containsKey(model)) {
                 value = (T)getValue(propOverride.get(model));
             }
         }

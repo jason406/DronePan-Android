@@ -136,7 +136,7 @@ public class PanoramaShoot implements MissionControl.Listener {
     }
 
     private void addAircraftYawAction(float relativeYaw) {
-        AircraftYawAction aircraftYawAction = new AircraftYawAction(relativeYaw, 40);
+        AircraftYawAction aircraftYawAction = new AircraftYawAction(relativeYaw, 20);
         this.missionControl.scheduleElement(aircraftYawAction);
     }
 
