@@ -56,7 +56,7 @@ public class DJIConnection {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context, "Register Success", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "SDK registered successfully.", Toast.LENGTH_LONG).show();
                     }
                 });
             } else {
@@ -64,7 +64,7 @@ public class DJIConnection {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context, "register sdk failed, check if network is available", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "SDK registration failed. Please check your network connection.", Toast.LENGTH_LONG).show();
                     }
                 });
             }
