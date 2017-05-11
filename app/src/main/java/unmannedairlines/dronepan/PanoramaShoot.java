@@ -19,6 +19,7 @@ public class PanoramaShoot implements MissionControl.Listener {
 
     private MissionControl missionControl;
     private Settings settings;
+    private CameraSystemStateController cameraStateController;
 
     private int numberOfPhotosTaken;
     private int totalNumberOfPhotos;
@@ -30,6 +31,7 @@ public class PanoramaShoot implements MissionControl.Listener {
     private Listener listener;
 
     public PanoramaShoot() {
+        this.cameraStateController = new CameraSystemStateController(DJIConnection.getInstance().getCamera());
         this.missionControl = MissionControl.getInstance();
         this.missionControl.addListener(this);
     }
@@ -55,12 +57,12 @@ public class PanoramaShoot implements MissionControl.Listener {
 
         this.settings = settings;
 
-        if (this.settings.getShootRowByRow()) {
-            this.setupRowByRow();
-        }
-        else {
+        //if (this.settings.getShootRowByRow()) {
+        //    this.setupRowByRow();
+        //}
+        //else {
             this.setupColumnByColumn();
-        }
+        //}
 
         this.setupNadirShots();
 
@@ -68,24 +70,24 @@ public class PanoramaShoot implements MissionControl.Listener {
     }
 
     private void setupRowByRow() {
-        int photosPerRow = settings.getPhotosPerRow();
-        int numberOfRows = settings.getNumberOfRows();
-        boolean useGimbalYaw = settings.getRelativeGimbalYaw();
-
-        for (int r = 0; r < numberOfRows; r++) {
-            addGimbalPitchAction(settings.getPitchAngle() * r);
-
-            for (int i = 0; i < photosPerRow; i++) {
-                if (useGimbalYaw) {
-                    addGimbalYawAction(settings.getYawAngle() * i);
-                }
-                else {
-                    addAircraftYawAction(settings.getYawAngle());
-                }
-
-                addPhotoShootAction();
-            }
-        }
+//        int photosPerRow = settings.getPhotosPerRow();
+//        int numberOfRows = settings.getNumberOfRows();
+//        boolean useGimbalYaw = false; settings.getRelativeGimbalYaw();
+//
+//        for (int r = 0; r < numberOfRows; r++) {
+//            addGimbalPitchAction(settings.getPitchAngle() * -r);
+//
+//            for (int i = 0; i < photosPerRow; i++) {
+//                if (useGimbalYaw) {
+//                    //addGimbalYawAction(settings.getYawAngle() * i);
+//                }
+//                else {
+//                    addAircraftYawAction(settings.getYawAngle());
+//                }
+//
+//                addPhotoShootAction();
+//            }
+//        }
     }
 
     private void setupColumnByColumn() {
@@ -94,15 +96,15 @@ public class PanoramaShoot implements MissionControl.Listener {
         boolean useGimbalYaw = false; //settings.getRelativeGimbalYaw();
 
         for (int c = 0; c < photosPerRow; c++) {
-            if (useGimbalYaw) {
-                addGimbalYawAction(settings.getYawAngle() * c);
-            }
-            else {
+            //if (useGimbalYaw) {
+                //addGimbalYawAction(settings.getYawAngle() * c);
+            //}
+            //else {
                 addAircraftYawAction(settings.getYawAngle());
-            }
+            //}
 
             for (int i = 0; i < numberOfRows; i++) {
-                addGimbalPitchAction(settings.getPitchAngle() * i);
+                addGimbalPitchAction(settings.getPitchAngle() * -i);
                 addPhotoShootAction();
             }
         }
@@ -151,8 +153,16 @@ public class PanoramaShoot implements MissionControl.Listener {
     }
 
     private void addPhotoShootAction() {
-        WaitForCameraReadyAction waitForCameraReadyAction = new WaitForCameraReadyAction();
+        WaitForCameraReadyAction waitForCameraReadyAction = new WaitForCameraReadyAction(this.cameraStateController);
         this.missionControl.scheduleElement(waitForCameraReadyAction);
+
+        /*
+        int delayInMilliseconds = (int)Math.round(this.settings.getDelayBeforeEachShot() * 1000);
+        if (delayInMilliseconds > 0) {
+            DelayAction delayAction = new DelayAction(delayInMilliseconds);
+            this.missionControl.scheduleElement(delayAction);
+        }
+        */
 
         ShootPhotoAction photoAction = new ShootPhotoAction();
         this.missionControl.scheduleElement(photoAction);
@@ -179,6 +189,16 @@ public class PanoramaShoot implements MissionControl.Listener {
         if (error != null) {
             Log.e(TAG, error.toString());
         }
+
+        String message = "";
+        if (event != null) {
+            message += "Mission Event: " + event.toString();
+        }
+        if (element != null) {
+            message += " Element: " + element.toString();
+        }
+
+        Log.i(TAG, message);
 
         if (event == TimelineEvent.STARTED ||
             event == TimelineEvent.FINISHED ||

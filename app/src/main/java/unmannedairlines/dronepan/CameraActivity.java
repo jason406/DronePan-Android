@@ -113,7 +113,7 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
                 break;
             }
             case R.id.panoButton: {
-                startPanorama();
+                startStopPanorama();
                 break;
             }
             default:
@@ -121,16 +121,21 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
         }
     }
 
-    private void startPanorama()
+    private void startStopPanorama()
     {
-        // check for SD card
+        if (this.panoramaShoot.isMissionRunning()) {
+            this.panoramaShoot.stop();
+            Log.i(TAG, "Panorama shoot stopped.");
+        }
+        else {
+            // check for SD card
 
-
-        //
-        Log.e(TAG, "startPanorama");
-        this.panoramaShoot.setup(SettingsManager.getInstance().getSettings(DJIConnection.getInstance().getModelSafely()));
-        this.panoramaShoot.start();
-        Log.i(TAG, "Panorama shoot started.");
+            //
+            Log.e(TAG, "startPanorama");
+            this.panoramaShoot.setup(SettingsManager.getInstance().getSettings(DJIConnection.getInstance().getModelSafely()));
+            this.panoramaShoot.start();
+            Log.i(TAG, "Panorama shoot started.");
+        }
     }
 
     private void stopPanorama() {

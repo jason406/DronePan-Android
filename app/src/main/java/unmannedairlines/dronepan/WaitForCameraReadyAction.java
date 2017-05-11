@@ -2,28 +2,26 @@ package unmannedairlines.dronepan;
 
 import android.support.annotation.NonNull;
 
-import dji.common.camera.SystemState;
 import dji.common.error.DJIError;
-import dji.sdk.camera.Camera;
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineElementFeedback;
 
+public class WaitForCameraReadyAction extends TimelineElement implements CameraSystemStateController.Listener {
 
-public class WaitForCameraReadyAction extends TimelineElement implements SystemState.Callback {
-
-    Camera camera;
+    CameraSystemStateController stateController;
     TimelineElementFeedback feedback;
 
-    public WaitForCameraReadyAction() {
-        this.camera = DJIConnection.getInstance().getCamera();
+    public WaitForCameraReadyAction(CameraSystemStateController stateController) {
+        this.stateController = stateController;
         this.feedback = MissionControl.getInstance();
     }
 
     @Override
     public void run() {
         this.feedback.onStart(this);
-        this.camera.setSystemStateCallback(this);
+        this.stateController.registerListener(this);
+        this.checkIfCameraIsReadyAndNotify();
     }
 
     @Override
@@ -33,7 +31,7 @@ public class WaitForCameraReadyAction extends TimelineElement implements SystemS
 
     @Override
     public void stop() {
-        this.camera.setSystemStateCallback(null);
+        this.stateController.unregisterListener(this);
         this.feedback.onStopWithError(this, null);
     }
 
@@ -43,9 +41,14 @@ public class WaitForCameraReadyAction extends TimelineElement implements SystemS
     }
 
     @Override
-    public void onUpdate(@NonNull SystemState systemState) {
-        if (CameraSystemStateExtensions.isReady(systemState)) {
+    public void onCameraStateChanged() {
+        this.checkIfCameraIsReadyAndNotify();
+    }
+
+    private void checkIfCameraIsReadyAndNotify() {
+        if (this.stateController.isReady()) {
             this.feedback.onFinishWithError(this, null);
+            this.stateController.unregisterListener(this);
         }
     }
 }
