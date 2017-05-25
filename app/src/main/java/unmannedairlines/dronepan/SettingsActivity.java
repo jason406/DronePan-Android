@@ -8,6 +8,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import dji.common.product.Model;
+import unmannedairlines.dronepan.logic.DJIConnection;
+import unmannedairlines.dronepan.logic.Settings;
+import unmannedairlines.dronepan.logic.SettingsManager;
 
 public class SettingsActivity extends BaseActivity implements View.OnClickListener {
 

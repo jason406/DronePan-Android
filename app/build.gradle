@@ -22,6 +22,10 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile 'com.googlecode.plist:dd-plist:1.8'
     compile fileTree(dir: 'libs', include: ['*.jar'])

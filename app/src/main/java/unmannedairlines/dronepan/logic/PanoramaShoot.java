@@ -1,4 +1,4 @@
-package unmannedairlines.dronepan;
+package unmannedairlines.dronepan.logic;
 
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -6,17 +6,21 @@ import android.util.Log;
 import dji.common.error.DJIError;
 import dji.common.gimbal.Attitude;
 import dji.common.gimbal.Rotation;
+import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineEvent;
-import dji.sdk.mission.timeline.actions.AircraftYawAction;
 import dji.sdk.mission.timeline.actions.GimbalAttitudeAction;
 import dji.sdk.mission.timeline.actions.ShootPhotoAction;
+import unmannedairlines.dronepan.mission.CustomAircraftYawAction;
+import unmannedairlines.dronepan.mission.DelayAction;
+import unmannedairlines.dronepan.mission.WaitForCameraReadyAction;
+import unmannedairlines.dronepan.mission.helpers.CameraSystemStateController;
 
 public class PanoramaShoot implements MissionControl.Listener {
-
     private static final String TAG = PanoramaShoot.class.getName();
 
+    private FlightController flightController;
     private MissionControl missionControl;
     private Settings settings;
     private CameraSystemStateController cameraStateController;
@@ -30,10 +34,11 @@ public class PanoramaShoot implements MissionControl.Listener {
 
     private Listener listener;
 
-    public PanoramaShoot() {
-        this.cameraStateController = new CameraSystemStateController(DJIConnection.getInstance().getCamera());
+    public PanoramaShoot(DJIConnection djiConnection) {
         this.missionControl = MissionControl.getInstance();
         this.missionControl.addListener(this);
+
+        this.cameraStateController = new CameraSystemStateController(DJIConnection.getInstance().getCamera());
     }
 
     public void setListener(Listener listener) {
@@ -57,55 +62,54 @@ public class PanoramaShoot implements MissionControl.Listener {
 
         this.settings = settings;
 
-        //if (this.settings.getShootRowByRow()) {
-        //    this.setupRowByRow();
-        //}
-        //else {
+        if (this.settings.getShootRowByRow()) {
+            this.setupRowByRow();
+        }
+        else {
             this.setupColumnByColumn();
-        //}
+        }
 
         this.setupNadirShots();
-
         this.notifyListener();
     }
 
     private void setupRowByRow() {
-//        int photosPerRow = settings.getPhotosPerRow();
-//        int numberOfRows = settings.getNumberOfRows();
-//        boolean useGimbalYaw = false; settings.getRelativeGimbalYaw();
-//
-//        for (int r = 0; r < numberOfRows; r++) {
-//            addGimbalPitchAction(settings.getPitchAngle() * -r);
-//
-//            for (int i = 0; i < photosPerRow; i++) {
-//                if (useGimbalYaw) {
-//                    //addGimbalYawAction(settings.getYawAngle() * i);
-//                }
-//                else {
-//                    addAircraftYawAction(settings.getYawAngle());
-//                }
-//
-//                addPhotoShootAction();
-//            }
-//        }
+        int photosPerRow = settings.getPhotosPerRow();
+        int numberOfRows = settings.getNumberOfRows();
+        boolean useGimbalYaw = false; // settings.getRelativeGimbalYaw();
+
+        for (int r = 0; r < numberOfRows; r++) {
+            this.addGimbalPitchAction(settings.getPitchAngle() * -r);
+
+            for (int i = 0; i < photosPerRow; i++) {
+                this.addPhotoShootAction();
+
+                if (useGimbalYaw) {
+                    this.addGimbalYawAction(settings.getYawAngle() * (i+1));
+                }
+                else {
+                    this.addAircraftYawAction(settings.getYawAngle());
+                }
+            }
+        }
     }
 
     private void setupColumnByColumn() {
         int photosPerRow = settings.getPhotosPerRow();
         int numberOfRows = settings.getNumberOfRows();
-        boolean useGimbalYaw = false; //settings.getRelativeGimbalYaw();
+        boolean useGimbalYaw = settings.getRelativeGimbalYaw();
 
         for (int c = 0; c < photosPerRow; c++) {
-            //if (useGimbalYaw) {
-                //addGimbalYawAction(settings.getYawAngle() * c);
-            //}
-            //else {
-                addAircraftYawAction(settings.getYawAngle());
-            //}
-
             for (int i = 0; i < numberOfRows; i++) {
-                addGimbalPitchAction(settings.getPitchAngle() * -i);
-                addPhotoShootAction();
+                this.addGimbalPitchAction(settings.getPitchAngle() * -i);
+                this.addPhotoShootAction();
+            }
+
+            if (useGimbalYaw) {
+                this.addGimbalYawAction(settings.getYawAngle() * (c + 1));
+            }
+            else {
+                this.addAircraftYawAction(settings.getYawAngle());
             }
         }
     }
@@ -136,8 +140,12 @@ public class PanoramaShoot implements MissionControl.Listener {
     }
 
     private void addAircraftYawAction(float relativeYaw) {
-        AircraftYawAction aircraftYawAction = new AircraftYawAction(relativeYaw, 20);
+        //AircraftYawAction aircraftYawAction = new AircraftYawAction(relativeYaw, 20);
+        CustomAircraftYawAction aircraftYawAction = new CustomAircraftYawAction(relativeYaw, 20);
         this.missionControl.scheduleElement(aircraftYawAction);
+
+        DelayAction delayAction = new DelayAction(2000);
+        this.missionControl.scheduleElement(delayAction);
     }
 
     private void addGimbalYawAction(float absoluteYaw) {
@@ -156,13 +164,11 @@ public class PanoramaShoot implements MissionControl.Listener {
         WaitForCameraReadyAction waitForCameraReadyAction = new WaitForCameraReadyAction(this.cameraStateController);
         this.missionControl.scheduleElement(waitForCameraReadyAction);
 
-        /*
-        int delayInMilliseconds = (int)Math.round(this.settings.getDelayBeforeEachShot() * 1000);
+        int delayInMilliseconds = this.settings.getDelayBeforeEachShotInMs();
         if (delayInMilliseconds > 0) {
             DelayAction delayAction = new DelayAction(delayInMilliseconds);
             this.missionControl.scheduleElement(delayAction);
         }
-        */
 
         ShootPhotoAction photoAction = new ShootPhotoAction();
         this.missionControl.scheduleElement(photoAction);

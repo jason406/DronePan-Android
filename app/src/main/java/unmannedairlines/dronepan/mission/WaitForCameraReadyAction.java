@@ -1,11 +1,10 @@
-package unmannedairlines.dronepan;
-
-import android.support.annotation.NonNull;
+package unmannedairlines.dronepan.mission;
 
 import dji.common.error.DJIError;
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineElementFeedback;
+import unmannedairlines.dronepan.mission.helpers.CameraSystemStateController;
 
 public class WaitForCameraReadyAction extends TimelineElement implements CameraSystemStateController.Listener {
 

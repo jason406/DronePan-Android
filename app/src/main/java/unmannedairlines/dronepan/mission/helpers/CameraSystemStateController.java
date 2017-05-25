@@ -1,4 +1,4 @@
-package unmannedairlines.dronepan;
+package unmannedairlines.dronepan.mission.helpers;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -42,7 +42,7 @@ public class CameraSystemStateController implements SystemState.Callback {
     @Override
     public void onUpdate(@NonNull SystemState systemState) {
         this.currentSystemState = systemState;
-        Log.i(TAG, "isBusy? " + this.isBusy() + " isStoring? " + this.isStoringPhoto() + " isShooting? " + this.isShootingPhoto());
+        //Log.i(TAG, "isBusy? " + this.isBusy() + " isStoring? " + this.isStoringPhoto() + " isShooting? " + this.isShootingPhoto());
 
         this.notifyListener();
     }

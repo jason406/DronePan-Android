@@ -1,7 +1,6 @@
-package unmannedairlines.dronepan;
+package unmannedairlines.dronepan.mission;
 
 import android.os.Handler;
-import android.support.annotation.NonNull;
 
 import dji.common.error.DJIError;
 import dji.sdk.mission.MissionControl;

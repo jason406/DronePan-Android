@@ -1,4 +1,4 @@
-package unmannedairlines.dronepan;
+package unmannedairlines.dronepan.logic;
 
 import android.content.Context;
 import android.content.Intent;

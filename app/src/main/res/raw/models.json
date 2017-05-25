@@ -1,0 +1,18 @@
+{
+    "default": {
+        "allowsAboveHorizon": true,
+        "numberOfRows": 4,
+        "photosPerRow": 6,
+        "numberOfNadirShots": 1,
+        "useGimbalToYaw": true
+    },
+    "MavicPro": {
+        "allowsAboveHorizon": false,
+        "numberOfRows": 3,
+        "photosPerRow": 8
+    },
+    "Inspire": {
+        "useGimbalToYaw": true,
+        "photosPerRow": 7
+    }
+}

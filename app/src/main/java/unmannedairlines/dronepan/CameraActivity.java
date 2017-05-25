@@ -8,10 +8,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import unmannedairlines.dronepan.logic.DJIConnection;
+import unmannedairlines.dronepan.logic.PanoramaShoot;
+import unmannedairlines.dronepan.logic.SettingsManager;
 
 public class CameraActivity extends BaseActivity implements View.OnClickListener, PanoramaShoot.Listener {
 
@@ -21,7 +24,6 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
 
     private ImageButton settingsButton;
     private ImageButton panoButton;
-//    private Button panoButton2;
 
     private TextView photosTakenStatus;
     private PanoramaShoot panoramaShoot;
@@ -33,7 +35,7 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        panoramaShoot = new PanoramaShoot();
+        panoramaShoot = new PanoramaShoot(DJIConnection.getInstance());
 
         initUi();
         registerForDeviceChanges();
@@ -42,9 +44,6 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
     private void initUi() {
         panoButton = (ImageButton) findViewById(R.id.panoButton);
         panoButton.setOnClickListener(this);
-
-//        panoButton2 = (Button) findViewById(R.id.panoButton2);
-//        panoButton2.setOnClickListener(this);
 
         settingsButton = (ImageButton) findViewById(R.id.btn_settings);
         settingsButton.setOnClickListener(this);

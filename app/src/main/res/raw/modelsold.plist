@@ -22,16 +22,6 @@
 			<integer>1</integer>
 		</dict>
 	</dict>
-    <key>allowsAboveHorizon</key>
-    <dict>
-        <key>MavicPro</key>
-        <false/>
-    </dict>
-	<key>photosPerRow</key>
-	<dict>
-		<key>MavicPro</key>
-		<integer>7</integer>
-	</dict>
 	<key>relativeGimbalYaw</key>
 	<dict>
 		<key>Osmo</key>

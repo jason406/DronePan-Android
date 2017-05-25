@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.widget.TextView;
 import dji.sdk.base.BaseProduct;
+import unmannedairlines.dronepan.logic.DJIConnection;
 
 public class ConnectionActivity extends BaseActivity {
 

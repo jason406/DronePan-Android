@@ -3,7 +3,8 @@ package unmannedairlines.dronepan;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
-import dji.sdk.sdkmanager.DJISDKManager;
+
+import unmannedairlines.dronepan.logic.DJIConnection;
 
 public class DronePanApplication extends Application {
 
