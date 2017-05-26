@@ -20,7 +20,9 @@ public class Settings extends BaseObservable {
     private int numberOfNadirShots;
     private int delayBeforeEachShotInMs;
     private boolean allowsAboveHorizon;
-    private boolean relativeGimbalYaw;
+
+    private boolean canGimbalYaw;
+    private boolean useGimbalToYaw;
 
     private boolean useImperial;
     private boolean aebPhotoMode;
@@ -69,9 +71,15 @@ public class Settings extends BaseObservable {
     }
 
     @Bindable
-    public boolean getRelativeGimbalYaw()
+    public boolean getUseGimbalToYaw()
     {
-        return relativeGimbalYaw;
+        return useGimbalToYaw;
+    }
+
+    @Bindable
+    public boolean getCanGimbalYaw()
+    {
+        return canGimbalYaw;
     }
 
     @Bindable
@@ -142,9 +150,14 @@ public class Settings extends BaseObservable {
         notifyPropertyChanged(BR.allowsAboveHorizon);
     }
 
-    public void setRelativeGimbalYaw(boolean relativeGimbalYaw) {
-        this.relativeGimbalYaw = relativeGimbalYaw;
-        notifyPropertyChanged(BR.relativeGimbalYaw);
+    public void setUseGimbalToYaw(boolean useGimbalToYaw) {
+        this.useGimbalToYaw = useGimbalToYaw;
+        notifyPropertyChanged(BR.useGimbalToYaw);
+    }
+
+    public void setCanGimbalYaw(boolean canGimbalYaw) {
+        this.canGimbalYaw = canGimbalYaw;
+        notifyPropertyChanged(BR.canGimbalYaw);
     }
 
     public void setAebPhotoMode(boolean aebPhotoMode) {
@@ -225,14 +238,15 @@ public class Settings extends BaseObservable {
     }
 
     private void setDefaults() {
-        photosPerRow = 10;
-        numberOfRows = 3;
-        numberOfNadirShots = 2;
+        photosPerRow = 1;
+        numberOfRows = 1;
+        numberOfNadirShots = 0;
         delayBeforeEachShotInMs = 0;
         allowsAboveHorizon = false;
-        relativeGimbalYaw = false;
+        canGimbalYaw = false;
+        useGimbalToYaw = false;
         useImperial = false;
         aebPhotoMode = false;
-        shootRowByRow = true;
+        shootRowByRow = false;
     }
 }

@@ -89,7 +89,7 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
     {
         runOnUiThread(new Runnable() {
             public void run() {
-                photosTakenStatus.setText(String.format("Photo: %o/%o", panoramaShoot.getNumberOfPhotosTaken(), panoramaShoot.getTotalNumberOfPhotos()));
+                photosTakenStatus.setText(String.format("Photo: %s/%s", panoramaShoot.getNumberOfPhotosTaken(), panoramaShoot.getTotalNumberOfPhotos()));
             }
         });
     }

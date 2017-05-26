@@ -151,12 +151,19 @@ public class SettingsFactory {
             @Override
             Object get() { return settings.getShootRowByRow(); }
         });
-        setterGetters.add(new SetterGetter(SettingsConstants.RelativeGimbalYaw) {
+        setterGetters.add(new SetterGetter(SettingsConstants.CanGimbalYaw) {
             @Override
-            void set(Object value) { settings.setRelativeGimbalYaw((boolean)value); }
+            void set(Object value) { settings.setCanGimbalYaw((boolean)value); }
 
             @Override
-            Object get() { return settings.getRelativeGimbalYaw(); }
+            Object get() { return settings.getCanGimbalYaw(); }
+        });
+        setterGetters.add(new SetterGetter(SettingsConstants.UseGimbalToYaw) {
+            @Override
+            void set(Object value) { settings.setUseGimbalToYaw((boolean)value); }
+
+            @Override
+            Object get() { return settings.getUseGimbalToYaw(); }
         });
     }
 
@@ -182,8 +189,10 @@ public class SettingsFactory {
         catch (JSONException e) {}
 
         try {
-            if (this.modelSettings.has(setterGetter.setting)) {
-                value = this.modelSettings.get(setterGetter.setting);
+            if (this.modelSettings != null) {
+                if (this.modelSettings.has(setterGetter.setting)) {
+                    value = this.modelSettings.get(setterGetter.setting);
+                }
             }
         }
         catch (JSONException e) {}
@@ -196,7 +205,12 @@ public class SettingsFactory {
             } catch (JSONException e) { }
         }
 
-        setterGetter.set(value);
+        try {
+            setterGetter.set(value);
+        }
+        catch (ClassCastException e) {
+            Log.e(TAG, "Can't set " + setterGetter.setting, e);
+        }
     }
 
     public void saveUserSettings() {

@@ -234,7 +234,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{String.valueOf(settings.delayBeforeEachShot)}"/>
+                        android:text="@{String.valueOf(settings.delayBeforeEachShotInMs)}"/>
 
                 </LinearLayout>
 
@@ -243,7 +243,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:max="150"
-                    android:progress="@{(int)(settings.delayBeforeEachShot * 10000)}"
+                    android:progress="@{(int)(settings.delayBeforeEachShotInMs * 10000)}"
                     android:id="@+id/delayBeforeEachShotSeekBar"
                     android:onProgressChanged="@{settings::valueChanged}"
                     android:layout_marginBottom="8dp"/>

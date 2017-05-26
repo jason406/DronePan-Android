@@ -9,5 +9,6 @@ public class SettingsConstants {
     public static final String AebPhotoMode = "aebPhotoMode";
     public static final String ShootRowByRow = "shootRowByRow";
     public static final String AllowsAboveHorizon = "allowsAboveHorizon";
-    public static final String RelativeGimbalYaw = "relativeGimbalYaw";
+    public static final String CanGimbalYaw = "canGimbalYaw";
+    public static final String UseGimbalToYaw = "useGimbalToYaw";
 }

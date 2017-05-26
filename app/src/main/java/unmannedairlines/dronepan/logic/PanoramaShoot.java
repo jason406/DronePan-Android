@@ -76,7 +76,7 @@ public class PanoramaShoot implements MissionControl.Listener {
     private void setupRowByRow() {
         int photosPerRow = settings.getPhotosPerRow();
         int numberOfRows = settings.getNumberOfRows();
-        boolean useGimbalYaw = false; // settings.getRelativeGimbalYaw();
+        boolean useGimbalYaw = settings.getUseGimbalToYaw();
 
         for (int r = 0; r < numberOfRows; r++) {
             this.addGimbalPitchAction(settings.getPitchAngle() * -r);
@@ -97,7 +97,7 @@ public class PanoramaShoot implements MissionControl.Listener {
     private void setupColumnByColumn() {
         int photosPerRow = settings.getPhotosPerRow();
         int numberOfRows = settings.getNumberOfRows();
-        boolean useGimbalYaw = settings.getRelativeGimbalYaw();
+        boolean useGimbalYaw = settings.getUseGimbalToYaw();
 
         for (int c = 0; c < photosPerRow; c++) {
             for (int i = 0; i < numberOfRows; i++) {
@@ -116,7 +116,7 @@ public class PanoramaShoot implements MissionControl.Listener {
 
     private void setupNadirShots() {
         int numberOfNadirShots = settings.getNumberOfNadirShots();
-        boolean useGimbalYaw = settings.getRelativeGimbalYaw();
+        boolean useGimbalYaw = settings.getUseGimbalToYaw();
 
         if (numberOfNadirShots == 0) {
             return;
@@ -140,12 +140,8 @@ public class PanoramaShoot implements MissionControl.Listener {
     }
 
     private void addAircraftYawAction(float relativeYaw) {
-        //AircraftYawAction aircraftYawAction = new AircraftYawAction(relativeYaw, 20);
         CustomAircraftYawAction aircraftYawAction = new CustomAircraftYawAction(relativeYaw, 20);
         this.missionControl.scheduleElement(aircraftYawAction);
-
-        DelayAction delayAction = new DelayAction(2000);
-        this.missionControl.scheduleElement(delayAction);
     }
 
     private void addGimbalYawAction(float absoluteYaw) {

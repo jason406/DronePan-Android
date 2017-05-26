@@ -68,13 +68,6 @@
             android:layout_marginTop="5dp"
             android:layout_width="22dp"
             android:layout_height="22dp"/>
-
-        <TextView
-            android:text="Photo: -"
-            android:id="@+id/photosTakenStatus"
-            android:textColor="@android:color/white"
-            android:layout_height="22dp"
-            android:layout_width="90dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -194,49 +187,39 @@
         <!--android:gravity="center"-->
         <!--android:visibility="invisible"/>-->
 
-    <!-- Pre-flight checklist panel -->
-    <!--<dji.ui.panel.PreFlightCheckListPanel-->
-        <!--android:id="@+id/PreflightCheckView"-->
-        <!--android:layout_width="400dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@id/signal"-->
-        <!--android:visibility="gone"/>-->
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:background="@android:color/transparent"
-        android:paddingLeft="10dp"
-        android:gravity="center_vertical">
-
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/ic_settings"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:id="@+id/btn_settings"
-            android:background="@android:color/transparent"/>
-
-    </LinearLayout>
-
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@mipmap/ic_start"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="31dp"
+        android:layout_marginBottom="40dp"
         android:id="@+id/panoButton"
         android:background="@android:color/transparent"/>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@color/dark_gray">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_settings"
+            android:id="@+id/btn_settings"
+            android:background="@android:color/transparent"
+            android:layout_margin="4dp"/>
+
+        <TextView
+            android:id="@+id/photosTakenStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="10dp"
+            android:text="Photo: -"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
 </RelativeLayout>
