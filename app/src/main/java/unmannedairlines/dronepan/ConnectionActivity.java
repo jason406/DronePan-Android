@@ -8,26 +8,23 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import dji.sdk.base.DJIBaseProduct;
+import dji.sdk.base.BaseProduct;
+import unmannedairlines.dronepan.logic.DJIConnection;
 
 public class ConnectionActivity extends BaseActivity {
 
     private static final String TAG = ConnectionActivity.class.getName();
 
     private TextView mTextConnectionStatus;
+    private boolean mCameraLaunched;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
             updateUI();
-
         }
     };
 
@@ -61,6 +58,21 @@ public class ConnectionActivity extends BaseActivity {
         if (DronePanApplication.isRunningOnEmulator()) {
             launchCameraActivity();
         }
+
+        // Show version info.
+        TextView versionTextView = (TextView)findViewById(R.id.versionTextView);
+        versionTextView.setText("DronePan Version: " + DronePanApplication.getBuildVersion());
+
+        TextView sdkVersionTextView = (TextView)findViewById(R.id.sdkVersionTextView);
+        sdkVersionTextView.setText("SDK Version: " + DJIConnection.getInstance().getSdkVersion());
+
+        mCameraLaunched = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mCameraLaunched = false;
     }
 
     @Override
@@ -70,43 +82,42 @@ public class ConnectionActivity extends BaseActivity {
     }
 
     private void updateUI() {
-        DJIBaseProduct mProduct = DJIConnection.getProductInstance();
-
+        BaseProduct mProduct = DJIConnection.getInstance().getProduct();
         if (null != mProduct && mProduct.isConnected()) {
-
             if (null != mProduct.getModel()) {
-                mTextConnectionStatus.setText(mProduct.getModel().getDisplayName() + " connected");
-            } else {
-                mTextConnectionStatus.setText("Model unavailable");
+                mTextConnectionStatus.setText(mProduct.getModel().getDisplayName() + " connected ...");
+            }
+            else {
+                mTextConnectionStatus.setText("Model unavailable.");
             }
 
             // Let's take them to the camera view
-            launchCameraActivity();
-
-        } else {
-
-            mTextConnectionStatus.setText("No product connected");
-
+            this.launchCameraActivity();
+        }
+        else {
+            mTextConnectionStatus.setText("No product connected.");
         }
     }
 
     private void launchCameraActivity() {
+        if (mCameraLaunched)
+        {
+            return;
+        }
+
+        mCameraLaunched = true;
 
         final Handler h = new Handler();
 
         final Runnable begin = new Runnable() {
-
             @Override
             public void run() {
-
                 Intent intent = new Intent(ConnectionActivity.this, CameraActivity.class);
                 startActivity(intent);
-
             }
         };
 
         // Let's delay for 1 second and then we'll display the camera view
         h.postDelayed(begin, 1000);
-
     }
 }

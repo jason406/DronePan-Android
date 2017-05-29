@@ -8,7 +8,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import dji.common.product.Model;
-import dji.sdk.base.DJIBaseProduct;
+import unmannedairlines.dronepan.logic.DJIConnection;
+import unmannedairlines.dronepan.logic.Settings;
+import unmannedairlines.dronepan.logic.SettingsManager;
 
 public class SettingsActivity extends BaseActivity implements View.OnClickListener {
 
@@ -19,7 +21,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
 
         ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
 
-        Model connectedModel = DJIConnection.getModelSafely();
+        Model connectedModel = DJIConnection.getInstance().getModelSafely();
         Settings settings = SettingsManager.getInstance().getSettings(connectedModel);
         binding.setVariable(BR.settings, settings);
 
@@ -27,14 +29,15 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
         button.setOnClickListener(this);
 
         TextView versionTextView = (TextView)findViewById(R.id.versionTextView);
-        versionTextView.setText("DronePan Version " + DronePanApplication.getBuildVersion());
+        versionTextView.setText("DronePan Version: " + DronePanApplication.getBuildVersion());
 
         TextView sdkVersionTextView = (TextView)findViewById(R.id.sdkVersionTextView);
-        sdkVersionTextView.setText("SDK Version " + DJIConnection.getSdkVersion());
+        sdkVersionTextView.setText("SDK Version: " + DJIConnection.getInstance().getSdkVersion());
     }
 
     @Override
-    public void onClick(View view) {
+    public void onClick(View view)
+    {
         switch (view.getId())
         {
             case R.id.goBackButton:
