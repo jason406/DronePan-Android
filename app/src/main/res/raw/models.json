@@ -1,0 +1,35 @@
+{
+    "default": {
+        "allowsAboveHorizon": true,
+        "numberOfRows": 4,
+        "photosPerRow": 6,
+        "numberOfNadirShots": 1,
+        "canGimbalYaw": false,
+        "useGimbalToYaw": false
+    },
+    "MAVIC_PRO": {
+        "allowsAboveHorizon": false,
+        "numberOfRows": 3,
+        "photosPerRow": 8
+    },
+    "INSPIRE_1": {
+        "canGimbalYaw": true,
+        "useGimbalToYaw": true,
+        "photosPerRow": 7
+    },
+    "INSPIRE_1_PRO": {
+        "canGimbalYaw": true,
+        "useGimbalToYaw": true,
+        "photosPerRow": 7
+    },
+    "INSPIRE_1_RAW": {
+        "canGimbalYaw": true,
+        "useGimbalToYaw": true,
+        "photosPerRow": 7
+    },
+    "INSPIRE_2": {
+        "canGimbalYaw": true,
+        "useGimbalToYaw": true,
+        "photosPerRow": 7
+    }
+}

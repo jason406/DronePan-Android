@@ -22,4 +22,34 @@
         android:id="@+id/text_connection_status"
         android:textColor="@android:color/white"
         android:textSize="18sp" />
+
+    <LinearLayout
+        android:id="@+id/versionInfoLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="8dp">
+
+        <TextView
+            android:text="DronePan Version 1.x.x"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/versionTextView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_marginLeft="8dp"
+            android:text="SDK Version: x.x.x"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sdkVersionTextView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+    </LinearLayout>
+
 </RelativeLayout>
