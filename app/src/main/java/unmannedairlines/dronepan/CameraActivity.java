@@ -128,7 +128,10 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
         }
         else {
             Log.e(TAG, "Setting up panorama shoot ...");
-            this.panoramaShoot.setup(SettingsManager.getInstance().getSettings(DJIConnection.getInstance().getModelSafely()));
+            //CHANGE
+            //this.panoramaShoot.setup(SettingsManager.getInstance().getSettings(DJIConnection.getInstance().getModelSafely()));
+            this.panoramaShoot.initPanorama(SettingsManager.getInstance().getSettings(DJIConnection.getInstance().getModelSafely()));
+            //this.panoramaShoot.debugPanoWithPitch(SettingsManager.getInstance().getSettings(DJIConnection.getInstance().getModelSafely()));
             this.panoramaShoot.start();
             Log.i(TAG, "Panorama shoot started.");
         }

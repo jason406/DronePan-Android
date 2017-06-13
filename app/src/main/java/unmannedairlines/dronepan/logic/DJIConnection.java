@@ -44,6 +44,7 @@ public class DJIConnection {
         // Initialize DJI SDK Manager
         this.handler = new Handler(Looper.getMainLooper());
         DJISDKManager.getInstance().registerApp(this.context, mDJISDKManagerCallback);
+
     }
 
     private DJISDKManager.SDKManagerCallback mDJISDKManagerCallback = new DJISDKManager.SDKManagerCallback() {
@@ -57,6 +58,8 @@ public class DJIConnection {
                     @Override
                     public void run() {
                         Toast.makeText(context, "SDK registered successfully.", Toast.LENGTH_LONG).show();
+                        //enable bridge mode
+                        //DJISDKManager.getInstance().enableBridgeModeWithBridgeAppIP("192.168.1.33");
                     }
                 });
             } else {

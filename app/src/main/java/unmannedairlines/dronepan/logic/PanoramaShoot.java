@@ -10,14 +10,19 @@ import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineEvent;
+import dji.sdk.mission.timeline.actions.AircraftYawAction;
 import dji.sdk.mission.timeline.actions.GimbalAttitudeAction;
 import dji.sdk.mission.timeline.actions.ShootPhotoAction;
 import unmannedairlines.dronepan.mission.CustomAircraftYawAction;
 import unmannedairlines.dronepan.mission.DelayAction;
 import unmannedairlines.dronepan.mission.WaitForCameraReadyAction;
 import unmannedairlines.dronepan.mission.helpers.CameraSystemStateController;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
-public class PanoramaShoot implements MissionControl.Listener {
+public class
+PanoramaShoot implements MissionControl.Listener {
     private static final String TAG = PanoramaShoot.class.getName();
 
     private FlightController flightController;
@@ -70,6 +75,87 @@ public class PanoramaShoot implements MissionControl.Listener {
         }
 
         this.setupNadirShots();
+        this.notifyListener();
+    }
+
+    public void debugPanoWithPitch(Settings settings){
+        this.numberOfPhotosTaken = 0;
+        this.totalNumberOfPhotos = 0;
+
+        this.missionControl.unscheduleEverything();
+
+        this.settings = settings;
+        boolean useGimbalYaw = settings.getUseGimbalToYaw();
+        useGimbalYaw=true;
+        int[] pitchAngles={0, 25, 54, 90};
+        int[] numberOfPhotos={7,7,5,3};
+        float stepYaw;
+
+    //    this.missionControl.scheduleElement(new AircraftYawAction(0,20)); //heading north 
+//// TODO: 2017/6/12 添加显示timeline执行的信息 
+        for (int i=0;i<pitchAngles.length;i++) {
+            this.addGimbalPitchAction(-pitchAngles[i]);
+            this.addPhotoShootAction();
+        }
+
+        
+        this.notifyListener();
+
+    }
+    public void initPanorama(Settings settings) {
+        this.numberOfPhotosTaken = 0;
+        this.totalNumberOfPhotos = 0;
+
+        this.missionControl.unscheduleEverything();
+
+        this.settings = settings;
+        boolean useGimbalYaw = settings.getUseGimbalToYaw();
+        useGimbalYaw=false;
+        int[] pitchAngles={0, 25, 54, 90};
+        int[] numberOfPhotos={7,7,5,3};
+        float stepYaw;
+
+        //this.missionControl.scheduleElement(new AircraftYawAction(0,20)); //heading north
+
+        if (useGimbalYaw) {
+            //// TODO: 2017/6/2 gimbal yaw
+
+            for (int i=0;i<pitchAngles.length;i++)
+            {
+                this.addGimbalPitchAction(-pitchAngles[i]);
+                stepYaw=360/numberOfPhotos[i];
+                for (int j=0;j<numberOfPhotos[i];j++)
+                {
+                    this.addPhotoShootAction();
+                    if (i%2==0) //偶数行-180~180
+                    {
+                        this.addGimbalYawAction(-180+stepYaw*j);
+                    }
+                    else
+                    {
+                        this.addGimbalYawAction(180-stepYaw*j);
+                    }
+
+                }
+
+            }
+        }
+        else {
+            //// TODO: 2017/6/2 uav yaw
+            for (int i=0;i<pitchAngles.length;i++)
+            {
+                this.addGimbalPitchAction(-pitchAngles[i]);
+                stepYaw=360/numberOfPhotos[i];
+                for (int j=0;j<numberOfPhotos[i];j++)
+                {
+                    this.addPhotoShootAction();
+                    this.addAircraftYawAction(stepYaw);//raletive yaw
+                }
+
+            }
+        }
+
+        //this.setupNadirShots();
         this.notifyListener();
     }
 
@@ -177,6 +263,9 @@ public class PanoramaShoot implements MissionControl.Listener {
     }
 
     public void start() {
+        //debug
+
+        //end debug
         this.missionControl.startTimeline();
     }
 
@@ -184,6 +273,45 @@ public class PanoramaShoot implements MissionControl.Listener {
         if (this.missionControl.isTimelineRunning()) {
             this.missionControl.stopTimeline();
         }
+    }
+    private List<TimelineElement> takePanoWithGimbal(int gimbalPitch, int photoCount,boolean isCW)
+    {
+        float angle = 360 / photoCount;
+        float initYaw;
+        List<TimelineElement> elements = new ArrayList<>();
+        final float INIT_COMLETION_TIME = 2;
+        final float ROTATE_COMLETION_TIME = 1.5f;
+        if (isCW)
+        {
+            initYaw = -180;
+            elements.add(addGimbalAction(gimbalPitch,0,initYaw,INIT_COMLETION_TIME));// initialize gimbal
+            for (int i = 0; i < photoCount; i++)
+            {
+                float azimuth=initYaw+angle*i;
+                elements.add(addGimbalAction(gimbalPitch,0,azimuth,ROTATE_COMLETION_TIME)); //rotate the gimbal
+                elements.add(new ShootPhotoAction());//take single photo
+            }
+        }
+        else
+        {
+            initYaw = 180;
+            elements.add(addGimbalAction(gimbalPitch,0,initYaw,INIT_COMLETION_TIME));// initialize gimbal
+            for (int i = 0; i < photoCount; i++)
+            {
+                float azimuth=initYaw-angle*i;
+                elements.add(addGimbalAction(gimbalPitch,0,azimuth,ROTATE_COMLETION_TIME)); //rotate the gimbal
+                elements.add(new ShootPhotoAction());//take single photo
+            }
+        }
+        return  elements;
+    }
+
+    private GimbalAttitudeAction addGimbalAction(float pitch, float roll, float yaw, float completionTime)
+    {
+        Attitude initAttitude = new Attitude(pitch,roll,yaw); //init gimbal yaw
+        GimbalAttitudeAction gimbalAction = new GimbalAttitudeAction(initAttitude);
+        gimbalAction.setCompletionTime(completionTime);
+        return gimbalAction;
     }
 
     @Override
