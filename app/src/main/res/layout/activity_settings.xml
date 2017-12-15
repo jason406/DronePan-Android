@@ -209,14 +209,14 @@
                 </LinearLayout>
 
                 <SeekBar
+                    android:id="@+id/numberOfNadirShotsSeekBar"
                     style="@style/Widget.AppCompat.SeekBar.Discrete"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="8dp"
                     android:max="20"
-                    android:progress="@{settings.numberOfNadirShots}"
-                    android:id="@+id/numberOfNadirShotsSeekBar"
                     android:onProgressChanged="@{settings::valueChanged}"
-                    android:layout_marginBottom="8dp"/>
+                    android:progress="@{settings.numberOfNadirShots}" />
 
                 <!-- Delay between photos -->
 
@@ -239,14 +239,14 @@
                 </LinearLayout>
 
                 <SeekBar
+                    android:id="@+id/delayBeforeEachShotSeekBar"
                     style="@style/Widget.AppCompat.SeekBar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="8dp"
                     android:max="150"
-                    android:progress="@{(int)(settings.delayBeforeEachShotInMs * 10000)}"
-                    android:id="@+id/delayBeforeEachShotSeekBar"
                     android:onProgressChanged="@{settings::valueChanged}"
-                    android:layout_marginBottom="8dp"/>
+                    android:progress="@{(int)(settings.delayBeforeEachShotInMs * 10000)}" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"

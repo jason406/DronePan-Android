@@ -18,7 +18,7 @@ public class Settings extends BaseObservable {
     private int photosPerRow;
     private int numberOfRows;
     private int numberOfNadirShots;
-    private int delayBeforeEachShotInMs;
+    private int delayBeforeEachShotInMs = 1000;
     private boolean allowsAboveHorizon;
 
     private boolean canGimbalYaw;

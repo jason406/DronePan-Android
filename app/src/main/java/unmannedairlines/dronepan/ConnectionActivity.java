@@ -9,13 +9,14 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import dji.sdk.base.BaseProduct;
 import unmannedairlines.dronepan.logic.DJIConnection;
 
 public class ConnectionActivity extends BaseActivity {
 
-    private static final String TAG = ConnectionActivity.class.getName();
+    private static final String TAG = "dronepan";
 
     private TextView mTextConnectionStatus;
     private boolean mCameraLaunched;
@@ -31,6 +32,7 @@ public class ConnectionActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "test");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ActivityCompat.requestPermissions(this,
