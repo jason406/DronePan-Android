@@ -164,8 +164,8 @@ PanoramaShoot implements MissionControl.Listener {
                 pitchAngles=new int[]{0,     8,    16,    26,    35,    45,    55,    66,    76,    90};
                 numberOfPhotos=new int[]{23 ,23,22,21 ,19 , 16 ,13 ,  10 ,   6,   3};
             default:
-                pitchAngles =new int[] {0,0};
-                numberOfPhotos=new int[]{0,0};
+                pitchAngles =new int[] {0,45};
+                numberOfPhotos=new int[]{1,1};
 
         }
         Log.i(TAG, "initPanorama: case"+ panoKind);
