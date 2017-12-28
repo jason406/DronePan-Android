@@ -19,6 +19,11 @@ android {
     dataBinding {
         enabled = true
     }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+
     packagingOptions {
         doNotStrip "*/*/libdjivideo.so"
         doNotStrip "*/*/libSDKRelativeJNI.so"
@@ -39,4 +44,5 @@ dependencies {
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.dji:dji-sdk:4.4.0'
     provided 'com.dji:dji-sdk-provided:4.4.0'
+    compile 'com.dji:dji-uilibrary:4.4.0'
 }

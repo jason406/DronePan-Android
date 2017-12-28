@@ -38,7 +38,9 @@ public class PanoramaShoot implements MissionControl.Listener {
         this.missionControl = MissionControl.getInstance();
         this.missionControl.addListener(this);
 
-        this.cameraStateController = new CameraSystemStateController(DJIConnection.getInstance().getCamera());
+        if (djiConnection.getCamera() != null) {
+            this.cameraStateController = new CameraSystemStateController(djiConnection.getCamera());
+        }
     }
 
     public void setListener(Listener listener) {
