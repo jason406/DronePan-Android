@@ -3,6 +3,7 @@ package unmannedairlines.dronepan;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+import android.support.multidex.MultiDex;
 
 import com.secneo.sdk.Helper;
 
@@ -10,12 +11,14 @@ import unmannedairlines.dronepan.logic.DJIConnection;
 
 public class DronePanApplication extends Application {
 
+    private static Context context;
+
+    @Override
     protected void attachBaseContext(Context paramContext) {
         super.attachBaseContext(paramContext);
+        MultiDex.install(this);
         Helper.install(DronePanApplication.this);
     }
-
-    private static Context context;
 
     @Override
     public void onCreate() {
