@@ -209,7 +209,7 @@ public class PanoramaShoot implements MissionControl.Listener {
             this.notifyListener();
         }
 
-        if (element instanceof ShootPhotoAction && event == TimelineEvent.ELEMENT_FINISHED) {
+        if (element instanceof ShootPhotoAction && event == TimelineEvent.FINISHED) {
             this.numberOfPhotosTaken++;
             Log.e(TAG, "Picture taken: " + this.numberOfPhotosTaken);
             this.notifyListener();

@@ -4,9 +4,16 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 
+import com.secneo.sdk.Helper;
+
 import unmannedairlines.dronepan.logic.DJIConnection;
 
 public class DronePanApplication extends Application {
+
+    protected void attachBaseContext(Context paramContext) {
+        super.attachBaseContext(paramContext);
+        Helper.install(DronePanApplication.this);
+    }
 
     private static Context context;
 

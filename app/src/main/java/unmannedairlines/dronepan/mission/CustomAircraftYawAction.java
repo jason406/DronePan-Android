@@ -20,7 +20,7 @@ import dji.sdk.mission.error.AircraftYawActionError;
 import dji.sdk.mission.timeline.actions.MissionAction;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
-import dji.thirdparty.eventbus.EventBus;
+import dji.thirdparty.v3.eventbus.EventBus;
 import unmannedairlines.dronepan.mission.helpers.CameraSystemStateController;
 
 public class CustomAircraftYawAction extends MissionAction {
