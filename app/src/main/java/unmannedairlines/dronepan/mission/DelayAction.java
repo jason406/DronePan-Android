@@ -1,6 +1,7 @@
 package unmannedairlines.dronepan.mission;
 
 import android.os.Handler;
+import android.support.annotation.Nullable;
 
 import dji.common.error.DJIError;
 import dji.sdk.mission.MissionControl;
@@ -55,4 +56,8 @@ public class DelayAction extends TimelineElement {
     public DJIError checkValidity() {
         return null;
     }
+    @Override
+    public void finishRun(@Nullable DJIError var1) {return;}
+
+
 }
