@@ -1,7 +1,5 @@
 package unmannedairlines.dronepan.mission;
 
-import android.support.annotation.Nullable;
-
 import dji.common.error.DJIError;
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
@@ -40,8 +38,6 @@ public class WaitForCameraReadyAction extends TimelineElement implements CameraS
     public DJIError checkValidity() {
         return null;
     }
-    @Override
-    public void finishRun(@Nullable DJIError var1) {return;}
 
     @Override
     public void onCameraStateChanged() {
