@@ -12,6 +12,7 @@ import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineEvent;
 import dji.sdk.mission.timeline.actions.GimbalAttitudeAction;
 import dji.sdk.mission.timeline.actions.ShootPhotoAction;
+import dji.sdk.mission.timeline.actions.AircraftYawAction;
 import unmannedairlines.dronepan.mission.CustomAircraftYawAction;
 import unmannedairlines.dronepan.mission.DelayAction;
 import unmannedairlines.dronepan.mission.WaitForCameraReadyAction;
@@ -55,6 +56,112 @@ public class PanoramaShoot implements MissionControl.Listener {
     public int getTotalNumberOfPhotos() {
         return this.totalNumberOfPhotos;
     }
+
+    public void  initPanorama(Settings settings) {
+
+
+        this.numberOfPhotosTaken = 0;
+        this.totalNumberOfPhotos = 0;
+
+        this.missionControl.unscheduleEverything();
+
+        this.settings = settings;
+        boolean useGimbalYaw = settings.getUseGimbalToYaw();
+        int panoKind = settings.getNumberOfNadirShots();
+
+        int[] pitchAngles;
+        int[] numberOfPhotos;
+
+        //panokind: 1-->72fov 15mm lens
+        // 2--> 45mm lens
+
+        switch (panoKind) {
+            case 1://72fov 15mm lens
+                pitchAngles=new int[]{0, 25, 54, 90};
+                numberOfPhotos=new int[]{7,7,5,3};
+            case 2://
+                pitchAngles=new int[]{0,     8,    16,    26,    35,    45,    55,    66,    76,    90};
+                numberOfPhotos=new int[]{23 ,23,22,21 ,19 , 16 ,13 ,  10 ,   6,   3};
+            default:
+                pitchAngles=new int[]{0,     8,    16,    26,    35,    45,    55,    66,    76,    90};
+                numberOfPhotos=new int[]{23 ,23,22,21 ,19 , 16 ,13 ,  10 ,   6,   3};
+
+                //30 overlap 187
+//                pitchAngles=new int[]{0, 7,14,23,31,41,50,60,69,79,90};
+//                numberOfPhotos=new int[]{25,25,25,23,22,19,16,13, 9, 6, 4};
+
+        }
+        Log.i(TAG, "initPanorama: case"+ panoKind);
+
+
+
+
+        //inspire 2 60 fov
+        //0    21    46    72    90
+        //9     8     6     3     3
+        //inspire 2 45mm lens
+
+
+        float stepYaw;
+        if (useGimbalYaw) {
+
+            for (int i=0;i<pitchAngles.length;i++)
+            {
+                this.addGimbalPitchAction(-pitchAngles[i]);
+                stepYaw=360/numberOfPhotos[i];
+                for (int j=0;j<numberOfPhotos[i];j++)
+                {
+                    float yaw = stepYaw*j;
+                    if (i%2==0) //偶数行-180~180
+                    {
+                        this.addGimbalAction(-pitchAngles[i],-179F+yaw);
+//                        this.addGimbalYawAction(-179+yaw);
+                        Log.i(TAG, "pitch:"+-pitchAngles[i]+" yaw:"+ (-180+yaw) );
+                    }
+                    else
+                    {
+                        this.addGimbalAction(-pitchAngles[i],180F-yaw);
+//                        this.addGimbalYawAction(180-yaw);
+                        Log.i(TAG, "pitch:"+-pitchAngles[i]+" yaw:"+ (180-yaw) );
+                    }
+                    this.addPhotoShootAction();
+
+                }
+
+            }
+        }
+        else {
+            //// TODO: 2017/6/2 uav yaw
+            for (int i=0;i<pitchAngles.length;i++)
+            {
+                this.addGimbalPitchAction(-pitchAngles[i]);
+                stepYaw=360/numberOfPhotos[i];
+                for (int j=0;j<numberOfPhotos[i];j++)
+                {
+                    this.addPhotoShootAction();
+                    this.addAircraftYawActionv2(stepYaw);//raletive yaw
+                }
+
+            }
+        }
+
+        //this.setupNadirShots();
+        this.notifyListener();
+    }
+
+    private void addAircraftYawActionv2(float relativeYaw) {
+        AircraftYawAction aircraftYawAction = new AircraftYawAction(relativeYaw, 60);
+        this.missionControl.scheduleElement(aircraftYawAction);
+    }
+
+    private void addGimbalAction(float pitch, float absoluteYaw) {
+        // actually is relative YAW
+        Attitude attitude = new Attitude(pitch, Rotation.NO_ROTATION, absoluteYaw);
+        GimbalAttitudeAction gimbalAttitudeAction = new GimbalAttitudeAction(attitude);
+//        gimbalAttitudeAction.setCompletionTime(2);
+        this.missionControl.scheduleElement(gimbalAttitudeAction);
+    }
+
 
     public void setup(Settings settings) {
         this.numberOfPhotosTaken = 0;
