@@ -36,6 +36,7 @@ public class CameraActivity extends BaseActivity implements View.OnClickListener
         setContentView(R.layout.activity_camera);
 
         panoramaShoot = new PanoramaShoot(DJIConnection.getInstance());
+        Log.i(TAG,"init camera activity");
 
         initUi();
         registerForDeviceChanges();
