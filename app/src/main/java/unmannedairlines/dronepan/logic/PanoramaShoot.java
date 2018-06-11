@@ -74,23 +74,26 @@ public class PanoramaShoot implements MissionControl.Listener {
 
         //panokind: 1-->72fov 15mm lens
         // 2--> 45mm lens
-
-        switch (panoKind) {
-            case 1://72fov 15mm lens
-                pitchAngles=new int[]{0, 25, 54, 90};
-                numberOfPhotos=new int[]{7,7,5,3};
-            case 2://
-                pitchAngles=new int[]{0,     8,    16,    26,    35,    45,    55,    66,    76,    90};
-                numberOfPhotos=new int[]{23 ,23,22,21 ,19 , 16 ,13 ,  10 ,   6,   3};
-            default:
-                pitchAngles=new int[]{0,     8,    16,    26,    35,    45,    55,    66,    76,    90};
-                numberOfPhotos=new int[]{23 ,23,22,21 ,19 , 16 ,13 ,  10 ,   6,   3};
-
-                //30 overlap 187
-//                pitchAngles=new int[]{0, 7,14,23,31,41,50,60,69,79,90};
-//                numberOfPhotos=new int[]{25,25,25,23,22,19,16,13, 9, 6, 4};
-
+        if (panoKind == 1){
+            //72fov 15mm lens
+            pitchAngles=new int[]{0, 29, 56, 90};
+            numberOfPhotos=new int[]{9,8,5,3};
         }
+        else if (panoKind == 2){ //45mm 146 25%
+            pitchAngles=new int[]{ 0,    10,    21,    31,    41,    52,    62,    71,    81,    90};
+            numberOfPhotos=new int[]{23,    23,    22,    20 ,   18,    14 ,   11 ,    8 ,    4 ,    3};
+        }
+        else if (panoKind == 3){ //45mm 171 30%
+            pitchAngles=new int[]{  0,9,    19 ,   28 ,   37 ,   47 ,   56 ,   65 ,   74 ,   82 ,   90};
+            numberOfPhotos=new int[]{25 ,   25 ,   23 ,   22 ,   20 ,   16 ,   13 ,   11 ,    7 ,    5  ,   4};
+        }
+        else
+        {
+            panoKind = -1;
+            pitchAngles=new int[]{ 0,    10,    21,    31,    41,    52,    62,    71,    81,    90};
+            numberOfPhotos=new int[]{23,    23,    22,    20 ,   18,    14 ,   11 ,    8 ,    4 ,    3};
+        }
+
         Log.i(TAG, "initPanorama: case"+ panoKind);
 
 
